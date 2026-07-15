@@ -358,15 +358,20 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 def main():
-    TOKEN = "8732356128:AAH-kVUzPTmDwXsjAarQR8akyZ6ot9V4B74"
-    
+    # El bot buscará el Token en el sistema de forma segura
+    TOKEN = os.environ.get("TELEGRAM_TOKEN")
+
+    if not TOKEN:
+        print("❌ ERROR: No se encontró la variable de entorno TELEGRAM_TOKEN.")
+        return
+
     app = Application.builder().token(TOKEN).build()
-    
+
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("programar", programar_hora)) # NUEVO: Registra el comando
+    app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
-    
-    print("🔮 El bot del Tarot de Marsella (Con alarmas) está en marcha...")
+
+    print("🔮 El bot del Tarot de Marsella en la nube está en marcha...")
     app.run_polling()
 
 if __name__ == '__main__':
