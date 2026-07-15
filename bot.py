@@ -358,19 +358,20 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 def main():
-    # El bot buscará el Token en el sistema de forma segura
+    # Buscamos la variable
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
-
+    
+    # 🚨 VALIDACIÓN CRÍTICA: Si es None o está vacío, detenemos el bot con un mensaje
     if not TOKEN:
-        print("❌ ERROR: No se encontró la variable de entorno TELEGRAM_TOKEN.")
-        return
-
+        raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe en Railway.")
+        
+    # Si pasa la validación, construye la app
     app = Application.builder().token(TOKEN).build()
-
+    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
-
+    
     print("🔮 El bot del Tarot de Marsella en la nube está en marcha...")
     app.run_polling()
 
