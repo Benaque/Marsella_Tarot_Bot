@@ -1,6 +1,7 @@
 import json
 import random
 import logging
+import os  # 👈 ¡ESTA ES LA LÍNEA QUE FALTA!
 import pytz
 from datetime import time
 import datetime
