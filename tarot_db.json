@@ -1,0 +1,392 @@
+{
+  "0": {
+    "nombre": "El Loco (Le Mat)",
+    "significado_derecho": "Inicio de un viaje, libertad, espontaneidad, fe ciega, entusiasmo, decisiones guiadas por el instinto.",
+    "significado_invertido": "Irresponsabilidad, imprudencia, decisiones alocadas, falta de dirección, desconexión de la realidad."
+  },
+  "1": {
+    "nombre": "El Mago (Le Bateleur)",
+    "significado_derecho": "Manifestación, iniciativa, ingenio, fuerza de voluntad, herramientas disponibles para comenzar algo nuevo.",
+    "significado_invertido": "Manipulación, engaño, talentos desperdiciados, indecisión, falta de acción o malas intenciones."
+  },
+  "2": {
+    "nombre": "La Papisa / La Sacerdotisa (La Papesse)",
+    "significado_derecho": "Intuición, misterio, sabiduría interior, paciencia, secretos por revelar, estudio y subconsciente.",
+    "significado_invertido": "Secretos ocultos dañinos, intuición ignorada, superficialidad, impaciencia o bloqueos emocionales."
+  },
+  "3": {
+    "nombre": "La Emperatriz (L'Impératrice)",
+    "significado_derecho": "Creatividad, fertilidad, abundancia, naturaleza, expresión artística, maternidad o gestación de proyectos.",
+    "significado_invertido": "Bloqueo creativo, dependencia de otros, exceso de control, problemas domésticos o infertilidad."
+  },
+  "4": {
+    "nombre": "El Emperador (L'Empereur)",
+    "significado_derecho": "Autoridad, estructura, estabilidad, orden, liderazgo, poder terrenal y protección paternal.",
+    "significado_invertido": "Tiranía, falta de disciplina, abuso de poder, rigidez mental o ineficiencia para controlar una situación."
+  },
+  "5": {
+    "nombre": "El Papa / El Hierofante (Le Pape)",
+    "significado_derecho": "Sabiduría espiritual, consejo, guía, tradición, conformidad social, enseñanza y bendición.",
+    "significado_invertido": "Dogmatismo, rigidez, malos consejos, rebelión contra la autoridad o falsos maestros."
+  },
+  "6": {
+    "nombre": "El Enamorado (L'Amoureux)",
+    "significado_derecho": "Elecciones del corazón, libre albedrío, alineación de valores, relaciones, dilemas y encrucijadas.",
+    "significado_invertido": "Indecisión, conflicto interno, malas elecciones amorosas, separación o falta de compromiso."
+  },
+  "7": {
+    "nombre": "El Carro (Le Chariot)",
+    "significado_derecho": "Victoria, control, fuerza de voluntad, éxito tras el esfuerzo, viaje triunfal, dirección clara.",
+    "significado_invertido": "Falta de control, estancamiento, pérdida de rumbo, agresión o planes que se descarrilan."
+  },
+  "8": {
+    "nombre": "La Justicia (La Justice)",
+    "significado_derecho": "Equilibrio, verdad, honestidad, consecuencias legales, causa y efecto, integridad y rectitud.",
+    "significado_invertido": "Injusticia, desequilibrio, prejuicios, problemas legales desfavorables o negación de la realidad."
+  },
+  "9": {
+    "nombre": "El Ermitaño (L'Ermite)",
+    "significado_derecho": "Introspección, búsqueda espiritual, soledad voluntaria, prudencia, sabiduría del tiempo y guía interior.",
+    "significado_invertido": "Aislamiento excesivo, paranoia, rechazo a la ayuda, retrasos obstinados o imprudencia."
+  },
+  "10": {
+    "nombre": "La Rueda de la Fortuna (La Roue de Fortune)",
+    "significado_derecho": "Cambios del destino, buena suerte, ciclos de la vida, giros inesperados, evolución y nuevas oportunidades.",
+    "significado_invertido": "Mala suerte, resistencia al cambio, repetición de viejos patrones, bloqueos externos temporales."
+  },
+  "11": {
+    "nombre": "La Fuerza (La Force)",
+    "significado_derecho": "Coraje, control de los instintos, compasión, fortaleza mental, paciencia y dominio suave sobre la adversidad.",
+    "significado_invertido": "Debilidad, abuso de la fuerza bruta, falta de autocontrol, inseguridad o bloqueos energéticos."
+  },
+  "12": {
+    "nombre": "El Colgado (Le Pendu)",
+    "significado_derecho": "Nueva perspectiva, pausa necesaria, sacrificio voluntario, dejar ir, aceptación de las circunstancias.",
+    "significado_invertido": "Martirio innecesario, resistencia a soltar, estancamiento por egoísmo, esfuerzo inútil."
+  },
+  "13": {
+    "nombre": "La Muerte (La Mort / Sin Nombre)",
+    "significado_derecho": "Transformación profunda, fin de un ciclo, renovación, cambios inevitables, desapego y renacimiento.",
+    "significado_invertido": "Resistencia al cambio, miedo al futuro, estancamiento doloroso, aferrarse a lo que ya murió."
+  },
+  "14": {
+    "nombre": "La Templanza (La Tempérance)",
+    "significado_derecho": "Moderación, equilibrio emocional, sanación, fluidez, paciencia, reconciliación y armonía.",
+    "significado_invertido": "Excesos, desequilibrio, falta de comunicación, impaciencia o choques de intereses."
+  },
+  "15": {
+    "nombre": "El Diablo (Le Diable)",
+    "significado_derecho": "Apegos materiales, pasión intensa, tentación, el inconsciente, instinto puro, ambición o ataduras.",
+    "significado_invertido": "Liberación de una adicción, superación de miedos, fin de una codependencia o materialismo destructivo."
+  },
+  "16": {
+    "nombre": "La Torre (La Maison Dieu)",
+    "significado_derecho": "Revelación repentina, destrucción de falsas estructuras, liberación forzada, crisis necesaria para el despertar.",
+    "significado_invertido": "Miedo al desastre, evitar una crisis inminente, reconstrucción lenta, atrapado en ruinas emocionales."
+  },
+  "17": {
+    "nombre": "La Estrella (L'Étoile)",
+    "significado_derecho": "Esperanza, fe, renovación espiritual, serenidad, inspiración, conexión cósmica y optimismo.",
+    "significado_invertido": "Falta de fe, desilusión, pesimismo, dudas sobre el futuro o talentos no aprovechados."
+  },
+  "18": {
+    "nombre": "La Luna (La Lune)",
+    "significado_derecho": "Intuición profunda, sueños, ilusiones, el subconsciente, misterio, miedos ocultos o confusión.",
+    "significado_invertido": "Liberación de temores, secretos que salen a la luz, fin de la confusión o autoengaño superado."
+  },
+  "19": {
+    "nombre": "El Sol (Le Soleil)",
+    "significado_derecho": "Éxito, claridad, alegría, vitalidad, relaciones felices, verdad revelada y logros compartidos.",
+    "significado_invertido": "Éxito retrasado, ego inflado, arrogancia, problemas de pareja pasajeros o falta de visibilidad."
+  },
+  "20": {
+    "nombre": "El Juicio (Le Jugement)",
+    "significado_derecho": "Despertar, llamado interior, evaluación del pasado, perdón, absolución y un nuevo rumbo en la vida.",
+    "significado_invertido": "Negación a ver la verdad, autorreproche, miedo a tomar decisiones importantes, estancamiento kármico."
+  },
+  "21": {
+    "nombre": "El Mundo (Le Monde)",
+    "significado_derecho": "Plenitud, realización absoluta, éxito rotundo, integración, reconocimiento y fin de un gran viaje con éxito.",
+    "significado_invertido": "Éxito a medias, falta de cierre, metas incompletas, imperfección o frustración antes de la meta."
+  },
+  "22": {
+    "nombre": "As de Bastos",
+    "significado_derecho": "Nueva iniciativa, chispa creativa, energía, pasión, comienzo de un proyecto o carrera.",
+    "significado_invertido": "Falta de dirección, retrasos en proyectos, energía desperdiciada, pérdida de motivación."
+  },
+  "23": {
+    "nombre": "Dos de Bastos",
+    "significado_derecho": "Planificación, decisiones de futuro, descubrimiento, salir de la zona de confort.",
+    "significado_invertido": "Miedo al cambio, mala planificación, falta de previsión, quedarse estancado."
+  },
+  "24": {
+    "nombre": "Tres de Bastos",
+    "significado_derecho": "Expansión, mirar hacia el horizonte, los esfuerzos dan frutos, oportunidades de viaje.",
+    "significado_invertido": "Retrasos en los resultados, frustración, falta de cooperación, expectativas poco realistas."
+  },
+  "25": {
+    "nombre": "Cuatro de Bastos",
+    "significado_derecho": "Celebración, armonía, regreso a casa, estabilidad, comunidad y éxito compartido.",
+    "significado_invertido": "Inestabilidad en el hogar, tensiones familiares, falta de apoyo, celebración cancelada."
+  },
+  "26": {
+    "nombre": "Cinco de Bastos",
+    "significado_derecho": "Competencia, conflicto menor, desacuerdos, lucha por destacar, tensión creativa.",
+    "significado_invertido": "Evitar el conflicto, resolución de disputas, caos, incapacidad para ponerse de acuerdo."
+  },
+  "27": {
+    "nombre": "Seis de Bastos",
+    "significado_derecho": "Victoria, éxito, reconocimiento público, orgullo, progreso y metas alcanzadas.",
+    "significado_invertido": "Falta de reconocimiento, caída en desgracia, orgullo excesivo, victoria vacía."
+  },
+  "28": {
+    "nombre": "Siete de Bastos",
+    "significado_derecho": "Defensa, mantener tu posición, resistencia ante la oposición, valentía ante el desafío.",
+    "significado_invertido": "Abrumado por las presiones, rendición, falta de confianza, ceder ante las críticas."
+  },
+  "29": {
+    "nombre": "Ocho de Bastos",
+    "significado_derecho": "Acción rápida, movimiento, noticias de camino, viajes veloces, alineación de eventos.",
+    "significado_invertido": "Retrasos frustrantes, actuar sin pensar, pánico, comunicación caótica o cancelada."
+  },
+  "30": {
+    "nombre": "Nueve de Bastos",
+    "significado_derecho": "Resiliencia, perseverancia, última resistencia, aprender de heridas pasadas, estar alerta.",
+    "significado_invertido": "Agotamiento extremo, desconfianza defensiva, debilidad, tirar la toalla antes del final."
+  },
+  "31": {
+    "nombre": "Diez de Bastos",
+    "significado_derecho": "Sobrecarga, responsabilidades pesadas, estrés, final del esfuerzo duro cerca.",
+    "significado_invertido": "Delegar tareas, colapso físico o mental, liberación de una carga innecesaria."
+  },
+  "32": {
+    "nombre": "Sota de Bastos",
+    "significado_derecho": "Mensajero de buenas noticias, entusiasmo, curiosidad, explorar nuevas pasiones.",
+    "significado_invertido": "Malas noticias, indecisión, inmadurez, falta de ideas o procrastinación."
+  },
+  "33": {
+    "nombre": "Caballo de Bastos",
+    "significado_derecho": "Energía impetuosa, aventura, audacia, cambios rápidos de residencia o trabajo.",
+    "significado_invertido": "Imprudencia, impaciencia, enojo fácil, interrupción abrupta de planes."
+  },
+  "34": {
+    "nombre": "Reina de Bastos",
+    "significado_derecho": "Confianza, calidez, magnetismo social, independencia, fertilidad y vitalidad.",
+    "significado_invertido": "Celos, manipulación, temperamento volátil, egoísmo o demandas excesivas."
+  },
+  "35": {
+    "nombre": "Rey de Bastos",
+    "significado_derecho": "Liderazgo visionario, autoridad, carisma, emprendimiento, enfoque en metas grandes.",
+    "significado_invertido": "Tiranía, impulsividad destructiva, expectativas poco realistas, soberbia."
+  },
+  "36": {
+    "nombre": "As de Copas",
+    "significado_derecho": "Nuevo amor, despertar emocional, intuición, creatividad pura, paz interior.",
+    "significado_invertido": "Bloqueo emocional, amor no correspondido, vacío sentimental, intuición nublada."
+  },
+  "37": {
+    "nombre": "Dos de Copas",
+    "significado_derecho": "Conexión mutua, romance, amistad sólida, sociedad armoniosa, equilibrio.",
+    "significado_invertido": "Ruptura, falta de armonía, desconfianza en la pareja, desconexión social."
+  },
+  "38": {
+    "nombre": "Tres de Copas",
+    "significado_derecho": "Celebración con amigos, apoyo comunitario, alegría compartida, abundancia.",
+    "significado_invertido": "Excesos, chismes destructivos, aislamiento, problemas en el círculo de amigos."
+  },
+  "39": {
+    "nombre": "Cuatro de Copas",
+    "significado_derecho": "Apatía, aburrimiento, contemplación, ignorar oportunidades que se presentan.",
+    "significado_invertido": "Despertar de la rutina, aceptación de nuevas opciones, motivación renovada."
+  },
+  "40": {
+    "nombre": "Cinco de Copas",
+    "significado_derecho": "Pérdida, luto, arrepentimiento, enfocarse en lo negativo dejando ir lo que queda.",
+    "significado_invertido": "Superación del dolor, aceptación del pasado, mirar hacia adelante, sanación."
+  },
+  "41": {
+    "nombre": "Seis de Copas",
+    "significado_derecho": "Nostalgia, recuerdos de infancia, reencuentros del pasado, generosidad pura.",
+    "significado_invertido": "Atascado en el pasado, idealización dañina, dificultad para madurar."
+  },
+  "42": {
+    "nombre": "Siete de Copas",
+    "significado_derecho": "Ilusiones, múltiples opciones, fantasías, dificultad para elegir con realismo.",
+    "significado_invertido": "Claridad mental, tomar una decisión firme, romper ilusiones, realismo."
+  },
+  "43": {
+    "nombre": "Ocho de Copas",
+    "significado_derecho": "Dejar ir, alejarse de una situación insatisfactoria, búsqueda espiritual activa.",
+    "significado_invertido": "Miedo a abandonar lo conocido, regresar a lo que te daña, estancamiento."
+  },
+  "44": {
+    "nombre": "Nueve de Copas",
+    "significado_derecho": "Deseo cumplido, satisfacción personal, placer, comodidad material y felicidad.",
+    "significado_invertido": "Insatisfacción a pesar de tenerlo todo, indulgencia excesiva, codicia."
+  },
+  "45": {
+    "nombre": "Diez de Copas",
+    "significado_derecho": "Armonía familiar, amor incondicional, alineación espiritual, felicidad hogareña.",
+    "significado_invertido": "Conflictos familiares, problemas de convivencia, desconexión emocional en el hogar."
+  },
+  "46": {
+    "nombre": "Sota de Copas",
+    "significado_derecho": "Sensibilidad, noticias de amor o creatividad, imaginación activa, nuevos sentimientos.",
+    "significado_invertido": "Inmadurez emocional, fantasías destructivas, desilusión amorosa rápida."
+  },
+  "47": {
+    "nombre": "Caballo de Copas",
+    "significado_derecho": "El mensajero romántico, propuestas emocionales, seguir los dictados del corazón.",
+    "significado_invertido": "Manipulador emocional, promesas falsas, irresponsabilidad afectiva."
+  },
+  "48": {
+    "nombre": "Reina de Copas",
+    "significado_derecho": "Empatía, intuición profunda, madre amorosa, apoyo incondicional y compasión.",
+    "significado_invertido": "Inestabilidad emocional, codependencia, manipulación mediante la culpa."
+  },
+  "49": {
+    "nombre": "Rey de Copas",
+    "significado_derecho": "Madurez emocional, control de los sentimientos, sabiduría, consejero comprensivo.",
+    "significado_invertido": "Frialdad calculada, adicciones, abuso emocional o manipulación."
+  },
+  "50": {
+    "nombre": "As de Espadas",
+    "significado_derecho": "Claridad mental absoluta, triunfo de la verdad, avance intelectual, decisión cortante.",
+    "significado_invertido": "Confusión, caos mental, injusticia, palabras que hieren innecesariamente."
+  },
+  "51": {
+    "nombre": "Dos de Espadas",
+    "significado_derecho": "Dilema, indecisión, bloqueo de emociones para pensar, tregua temporal.",
+    "significado_invertido": "Liberación de la parálisis, verdad dolorosa revelada, decisión forzada."
+  },
+  "52": {
+    "nombre": "Tres de Espadas",
+    "significado_derecho": "Dolor emocional, desilusión, separación, traición, herida necesaria para crecer.",
+    "significado_invertido": "Sanación de heridas del pasado, perdón, superación de una pérdida emocional."
+  },
+  "53": {
+    "nombre": "Cuatro de Espadas",
+    "significado_derecho": "Descanso, recuperación mental, meditación, pausa para recargar fuerzas.",
+    "significado_invertido": "Regreso a la actividad, agotamiento acumulado por no descansar, insomnio."
+  },
+  "54": {
+    "nombre": "Cinco de Espadas",
+    "significado_derecho": "Conflicto, ganar a cualquier costo, hostilidad, humillación de los demás.",
+    "significado_invertido": "Fin de disputas, deseo de reconciliación, remordimiento por acciones pasadas."
+  },
+  "55": {
+    "nombre": "Seis de Espadas",
+    "significado_derecho": "Transición, alejarse del dolor hacia aguas más tranquilas, viaje de recuperación.",
+    "significado_invertido": "Dificultad para avanzar, equipaje emocional pesado, resistencia al cambio."
+  },
+  "56": {
+    "nombre": "Siete de Espadas",
+    "significado_derecho": "Estrategia, actuar a espaldas de otros, astucia, evitar la confrontación directa.",
+    "significado_invertido": "Verdades que salen a la luz, remordimiento, confrontar las consecuencias."
+  },
+  "57": {
+    "nombre": "Ocho de Espadas",
+    "significado_derecho": "Sentirse atrapado por los propios pensamientos, autolimitación, parálisis por miedo.",
+    "significado_invertido": "Liberación de restricciones mentales, ver la salida a un problema, valentía."
+  },
+  "58": {
+    "nombre": "Nueve de Espadas",
+    "significado_derecho": "Ansiedad, pesadillas, culpa, preocupación excesiva, estrés mental severo.",
+    "significado_invertido": "Fin de un periodo oscuro, esperanza recuperada, salir de la depresión."
+  },
+  "59": {
+    "nombre": "Diez de Espadas",
+    "significado_derecho": "Tocar fondo, fin doloroso de una situación, derrota, el inicio del camino hacia arriba.",
+    "significado_invertido": "Recuperación lenta, evitar un desastre peor, resistirse al final inevitable."
+  },
+  "60": {
+    "nombre": "Sota de Espadas",
+    "significado_derecho": "Mente curiosa, agudeza intelectual, vigilancia, comunicación directa, críticas constructivas.",
+    "significado_invertido": "Espionaje, chismes maliciosos, hostilidad defensiva, palabras vacías."
+  },
+  "61": {
+    "nombre": "Caballo de Espadas",
+    "significado_derecho": "Acción mental rápida, defender la verdad con vigor, determinación implacable.",
+    "significado_invertido": "Impulsividad destructiva, peleas innecesarias, dispersión de energía mental."
+  },
+  "62": {
+    "nombre": "Reina de Espadas",
+    "significado_derecho": "Pensamiento analítico, independencia, límites claros, objetividad y honestidad directa.",
+    "significado_invertido": "Amargura, crítica mordaz y cruel, frialdad emocional extrema."
+  },
+  "63": {
+    "nombre": "Rey de Espadas",
+    "significado_derecho": "Verdad intelectual, justicia basada en lógica, consejero ético, mente brillante.",
+    "significado_invertido": "Manipulador intelectual, dictador rígido, crueldad mental o cinismo."
+  },
+  "64": {
+    "nombre": "As de Oros",
+    "significado_derecho": "Nueva oportunidad económica, prosperidad material, salud física sólida, abundancia.",
+    "significado_invertido": "Oportunidad perdida, retrasos financieros, codicia, mala inversión de recursos."
+  },
+  "65": {
+    "nombre": "Dos de Oros",
+    "significado_derecho": "Malabarismo financiero, adaptabilidad, priorizar tareas, equilibrio en el cambio.",
+    "significado_invertido": "Abrumado por las deudas, desorganización, falta de concentración."
+  },
+  "66": {
+    "nombre": "Tres de Oros",
+    "significado_derecho": "Trabajo en equipo, colaboración exitosa, maestría, reconocimiento profesional.",
+    "significado_invertido": "Falta de cooperación, mal rendimiento en el trabajo, egoísmo grupal."
+  },
+  "67": {
+    "nombre": "Cuatro de Oros",
+    "significado_derecho": "Ahorro, estabilidad, control material, resistencia al cambio, mentalidad de escasez.",
+    "significado_invertido": "Gasto excesivo, desapego material saludable o pérdida de control financiero."
+  },
+  "68": {
+    "nombre": "Cinco de Oros",
+    "significado_derecho": "Dificultad económica, sensación de desamparo, salud precaria, pérdida material.",
+    "significado_invertido": "Recuperación de estabilidad, fin de una crisis financiera, ayuda recibida."
+  },
+  "69": {
+    "nombre": "Seis de Oros",
+    "significado_derecho": "Generosidad, caridad, equilibrio entre dar y recibir, flujo de abundancia justa.",
+    "significado_invertido": "Abuso de poder financiero, deudas sin pagar, generosidad egoísta o interesada."
+  },
+  "70": {
+    "nombre": "Siete de Oros",
+    "significado_derecho": "Paciencia, evaluación de resultados a largo plazo, inversión que madura.",
+    "significado_invertido": "Frustración por retrasos, falta de esfuerzo, malas inversiones iniciales."
+  },
+  "71": {
+    "nombre": "Ocho de Oros",
+    "significado_derecho": "Dedicación al oficio, perfeccionamiento de habilidades, detalle, esfuerzo diario.",
+    "significado_invertido": "Falta de ambición, trabajo monótono, perfeccionismo paralizante."
+  },
+  "72": {
+    "nombre": "Nueve de Oros",
+    "significado_derecho": "Independencia financiera, lujo, autosuficiencia, disfrute del éxito en solitario.",
+    "significado_invertido": "Inseguridad material, gastos excesivos para aparentar, vacío emocional."
+  },
+  "73": {
+    "nombre": "Diez de Oros",
+    "significado_derecho": "Legado familiar, riqueza a largo plazo, estabilidad generacional, tradiciones.",
+    "significado_invertido": "Pérdida de herencia, problemas financieros familiares, disputas por dinero."
+  },
+  "74": {
+    "nombre": "Sota de Oros",
+    "significado_derecho": "Ambición inicial, deseo de aprender, oportunidades prácticas, noticias de dinero.",
+    "significado_invertido": "Falta de compromiso, ideas poco realistas, pereza o desorganización."
+  },
+  "75": {
+    "nombre": "Caballo de Oros",
+    "significado_derecho": "Rutina productiva, confiabilidad, constancia, paso lento pero seguro hacia la meta.",
+    "significado_invertido": "Estancamiento por terquedad, monotonía aburrida, pereza laboral."
+  },
+  "76": {
+    "nombre": "Reina de Oros",
+    "significado_derecho": "Abundancia práctica, hospitalidad, cuidado del hogar, estabilidad física y emocional.",
+    "significado_invertido": "Celos materiales, desequilibrio en el cuidado personal, dependencia del dinero."
+  },
+  "77": {
+    "nombre": "Rey de Oros",
+    "significado_derecho": "Éxito comercial definitivo, seguridad financiera, proveedor confiable, dominio material.",
+    "significado_invertido": "Avaricia obsesiva, materialismo extremo, rigidez inflexible en los negocios."
+  }
+}
