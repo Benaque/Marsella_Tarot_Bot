@@ -198,7 +198,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=mensaje, parse_mode="HTML")
 
     elif query.data == "menu_tres_cartas":
-        # Le avisamos al usuario que estamos barajando
+        # Le avisamos al usuario que estamos barajando en el mensaje del menú
         await query.edit_message_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         
         # 1. Sacamos 3 números (llaves) al azar de la base de datos
@@ -257,9 +257,10 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             texto_lectura += f"📍 <b>{posicion}: {titulo_carta}</b>\n"
             texto_lectura += f"📖 <i>{significado}</i>\n\n"
             
-        # 3. Enviamos el mensaje con la interpretación completa
-        # Editamos el mensaje original para poner el texto final (eliminamos el send_photo duplicado)
-        await query.edit_message_text(
+        # 3. ¡AQUÍ ESTÁ EL CAMBIO CLAVE! 
+        # Enviamos un mensaje NUEVO para que aparezca justo ABAJO de las 3 fotos.
+        await context.bot.send_message(
+            chat_id=chat_id,
             text=texto_lectura,
             parse_mode="HTML"
         )
