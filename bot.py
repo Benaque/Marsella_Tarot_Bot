@@ -216,7 +216,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             posicion = posiciones[i]
             
             # Enviamos la foto de la carta
-            with open(datos_carta['imagen'], 'rb') as foto:
+            with open(datos_carta['foto'], 'rb') as foto:
                 await context.bot.send_photo(chat_id=chat_id, photo=foto)
                 
             # Agregamos la información al mensaje final
