@@ -195,33 +195,39 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await query.edit_message_text(text=mensaje, parse_mode="HTML")
 
-    elif query.data == "menu_tres_cartas":
+elif query.data == "menu_tres_cartas":
         # Le avisamos al usuario que estamos barajando
         await query.edit_message_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         
-        # 1. Sacamos 3 cartas distintas al azar de nuestra base de datos
-        # Asumiendo que 'tarot_db' es el diccionario cargado desde tu JSON
-        nombres_cartas = list(tarot_db.keys())
-        cartas_seleccionadas = random.sample(nombres_cartas, 3)
+        # 1. Sacamos 3 números (llaves) al azar de la base de datos
+        claves_cartas = list(tarot_db.keys())
+        cartas_seleccionadas = random.sample(claves_cartas, 3)
         
         posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
         texto_lectura = "🌟 <b>TU TIRADA DE 3 CARTAS</b> 🌟\n\n"
         
         chat_id = update.effective_chat.id
         
-        # 2. Enviamos las imágenes una por una y armamos el texto
+        # 2. Armamos el texto
         for i in range(3):
-            nombre_carta = cartas_seleccionadas[i]
-            datos_carta = tarot_db[nombre_carta]
+            clave = cartas_seleccionadas[i]
+            datos_carta = tarot_db[clave]
             posicion = posiciones[i]
             
-            # Enviamos la foto de la carta
-            with open(datos_carta['foto'], 'rb') as foto:
-                await context.bot.send_photo(chat_id=chat_id, photo=foto)
-                
+            # Usamos los nombres exactos de tu JSON
+            nombre_real = datos_carta['nombre']
+            significado = datos_carta['significado_derecho']
+            
             # Agregamos la información al mensaje final
-            texto_lectura += f"📍 <b>{posicion}: {nombre_carta}</b>\n"
-            texto_lectura += f"📖 <i>{datos_carta['significado']}</i>\n\n"
+            texto_lectura += f"📍 <b>{posicion}: {nombre_real}</b>\n"
+            texto_lectura += f"📖 <i>{significado}</i>\n\n"
+            
+        # 3. Enviamos el mensaje con la interpretación completa
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texto_lectura,
+            parse_mode="HTML"
+        )
             
         # 3. Enviamos el mensaje con la interpretación completa
         await context.bot.send_message(
