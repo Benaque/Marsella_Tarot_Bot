@@ -184,26 +184,53 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer() 
+    chat_id = update.effective_chat.id
 
     # --- CONFIGURAR ALARMA ---
     if query.data == 'menu_programar':
         mensaje_instrucciones = (
-            "⏰ **Configuración de tu Alarma Diaria**\n\n"
-            "Para recibir tu carta automáticamente, escribe en el chat el comando `/programar` seguido de la hora.\n\n"
-            "👉 **Ejemplo:** `/programar 08:30`"
+            "⏰ <b>Configuración de tu Alarma Diaria</b>\n\n"
+            "Para recibir tu carta automáticamente, escribe en el chat el comando <code>/programar</code> seguido de la hora.\n\n"
+            "👉 <b>Ejemplo:</b> <code>/programar 08:30</code>"
         )
-        await query.message.edit_text(text=mensaje_instrucciones, parse_mode="Markdown", reply_markup=obtener_menu_principal())
+        # Blindaje: Si venimos de una foto (Tirada del día), borramos y enviamos un texto fresco
+        if query.message.photo:
+            await query.message.delete()
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=mensaje_instrucciones,
+                parse_mode="HTML",
+                reply_markup=obtener_menu_principal()
+            )
+        else:
+            await query.message.edit_text(
+                text=mensaje_instrucciones,
+                parse_mode="HTML",
+                reply_markup=obtener_menu_principal()
+            )
 
     # --- TIRADA DE 3 CARTAS ---
     elif query.data == "menu_tres_cartas":
-        await query.edit_message_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
+        # Blindaje: Evitamos el error de intentar editar un mensaje que contiene foto
+        if query.message.photo:
+            await query.message.delete()
+            mensaje_espera = await context.bot.send_message(
+                chat_id=chat_id,
+                text="🔮 Mezclando el mazo y sacando tus 3 cartas..."
+            )
+        else:
+            mensaje_espera = await query.edit_message_text(
+                text="🔮 Mezclando el mazo y sacando tus 3 cartas..."
+            )
         
+        # 1. Sacamos 3 números (llaves) al azar de la base de datos
         claves_cartas = list(tarot_db.keys())
         cartas_seleccionadas = random.sample(claves_cartas, 3)
+        
         posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
         texto_lectura = "🌟 <b>TU TIRADA DE 3 CARTAS</b> 🌟\n\n"
-        chat_id = update.effective_chat.id
         
+        # 2. Enviamos las imágenes y construimos el texto
         for i in range(3):
             clave = cartas_seleccionadas[i]
             datos_carta = tarot_db[clave]
@@ -238,7 +265,19 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             texto_lectura += f"📍 <b>{posicion}: {titulo_carta}</b>\n"
             texto_lectura += f"📖 <i>{significado}</i>\n\n"
             
-        await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML")
+        # Borramos el mensaje temporal de "Mezclando..." para dejar el chat impecable
+        try:
+            await mensaje_espera.delete()
+        except Exception:
+            pass
+
+        # 3. Enviamos la interpretación final abajo de las fotos y anexamos de nuevo el menú principal
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texto_lectura,
+            parse_mode="HTML",
+            reply_markup=obtener_menu_principal()
+        )
 
     # --- MENÚ DE INICIO ---
     elif query.data == 'volver_inicio':
