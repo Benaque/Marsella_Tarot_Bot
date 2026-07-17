@@ -186,7 +186,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer() 
 
     # Si el usuario hace clic en el botón de programar
-    if query.data == "boton_programar":  # Asegúrate de usar el mismo 'callback_data' que le pusiste a tu botón
+    if query.data == "menu_programar":  
         mensaje = (
             "⏰ <b>Para programar tu carta diaria:</b>\n\n"
             "Escríbeme el comando <code>/programar</code> seguido de la hora en formato 24h.\n\n"
