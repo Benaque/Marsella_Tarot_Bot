@@ -208,32 +208,31 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         chat_id = update.effective_chat.id
         
-        # 2. Armamos el texto
+        # 2. Enviamos las imágenes y construimos el texto
         for i in range(3):
             clave = cartas_seleccionadas[i]
             datos_carta = tarot_db[clave]
             posicion = posiciones[i]
             
-            # Usamos los nombres exactos de tu JSON
             nombre_real = datos_carta['nombre']
             significado = datos_carta['significado_derecho']
             
-            # 👇 NUEVO: ENVIAR LA IMAGEN 👇
-            # OJO: Cambia "imagenes" por el nombre real de tu carpeta si es distinto.
-            # Cambia ".jpg" si tus fotos son ".png".
+            # Intentamos enviar la foto
             ruta_imagen = f"imagenes/{clave}.jpg" 
-            
             try:
                 with open(ruta_imagen, 'rb') as foto:
                     await context.bot.send_photo(chat_id=chat_id, photo=foto)
-            except FileNotFoundError:
-                print(f"⚠️ Alerta: No se encontró la imagen en {ruta_imagen}")
-                await context.bot.send_message(chat_id=chat_id, text=f"🖼️ [Falta la imagen de {nombre_real}]")
-            # 👆 FIN DE LO NUEVO 👆
+            except:
+                # Si falla la foto, no hacemos nada, solo continuamos
+                pass 
+            
+            # Acumulamos el texto SIEMPRE
+            texto_lectura += f"📍 <b>{posicion}: {nombre_real}</b>\n"
+            texto_lectura += f"📖 <i>{significado}</i>\n\n"
             
         # 3. Enviamos el mensaje con la interpretación completa
-        await context.bot.send_message(
-            chat_id=chat_id,
+        # Editamos el mensaje original para poner el texto final
+        await query.edit_message_text(
             text=texto_lectura,
             parse_mode="HTML"
         )
