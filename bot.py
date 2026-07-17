@@ -195,7 +195,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await query.edit_message_text(text=mensaje, parse_mode="HTML")
 
-elif query.data == "menu_tres_cartas":
+    elif query.data == "menu_tres_cartas":
         # Le avisamos al usuario que estamos barajando
         await query.edit_message_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         
