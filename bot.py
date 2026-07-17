@@ -23,7 +23,7 @@ def obtener_menu_principal():
     keyboard = [
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
-        [InlineKeyboardButton("3️⃣ Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
+        [InlineKeyboardButton("🧚🏼‍♀️ Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
         [InlineKeyboardButton("🧿 Significado de los Arcanos", callback_data='ver_arcanos')]
     ]
     return InlineKeyboardMarkup(keyboard)
