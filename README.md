@@ -32,4 +32,4 @@ Python 3.12
 python-telegram-bot v21
 Pillow (para rotación de cartas)
 
-Proyectro administrado por @josebenaque
+Proyecto administrado por @josebenaque en Telegram
