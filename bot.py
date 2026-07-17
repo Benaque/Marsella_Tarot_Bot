@@ -20,7 +20,8 @@ with open('tarot_db.json', 'r', encoding='utf-8') as f:
 def obtener_menu_principal():
     keyboard = [
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
-        [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')], # 💡 NUEVO BOTÓN
+        [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
+        [InlineKeyboardButton("🃏 Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
         [InlineKeyboardButton("🔮 Significado de los Arcanos", callback_data='ver_arcanos')]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -193,7 +194,42 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "👉 Ejemplo: <code>/programar 08:30</code>"
         )
         await query.edit_message_text(text=mensaje, parse_mode="HTML")
+
+    elif query.data == "menu_tres_cartas":
+        # Le avisamos al usuario que estamos barajando
+        await query.edit_message_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         
+        # 1. Sacamos 3 cartas distintas al azar de nuestra base de datos
+        # Asumiendo que 'tarot_db' es el diccionario cargado desde tu JSON
+        nombres_cartas = list(tarot_db.keys())
+        cartas_seleccionadas = random.sample(nombres_cartas, 3)
+        
+        posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
+        texto_lectura = "🌟 <b>TU TIRADA DE 3 CARTAS</b> 🌟\n\n"
+        
+        chat_id = update.effective_chat.id
+        
+        # 2. Enviamos las imágenes una por una y armamos el texto
+        for i in range(3):
+            nombre_carta = cartas_seleccionadas[i]
+            datos_carta = tarot_db[nombre_carta]
+            posicion = posiciones[i]
+            
+            # Enviamos la foto de la carta
+            with open(datos_carta['imagen'], 'rb') as foto:
+                await context.bot.send_photo(chat_id=chat_id, photo=foto)
+                
+            # Agregamos la información al mensaje final
+            texto_lectura += f"📍 <b>{posicion}: {nombre_carta}</b>\n"
+            texto_lectura += f"📖 <i>{datos_carta['significado']}</i>\n\n"
+            
+        # 3. Enviamos el mensaje con la interpretación completa
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texto_lectura,
+            parse_mode="HTML"
+        ) 
+
     # Aquí irían tus otros botones (sacar carta, ver diccionario, etc.)
     elif query.data == "sacar_carta":
         # ... tu código actual para sacar cartas ...
