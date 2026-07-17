@@ -181,6 +181,23 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    
+    # Esto es vital: le dice a Telegram que ya recibimos el clic para que quite el "relojito" de carga
+    await query.answer() 
+
+    # Si el usuario hace clic en el botón de programar
+    if query.data == "boton_programar":  # Asegúrate de usar el mismo 'callback_data' que le pusiste a tu botón
+        mensaje = (
+            "⏰ <b>Para programar tu carta diaria:</b>\n\n"
+            "Escríbeme el comando <code>/programar</code> seguido de la hora en formato 24h.\n\n"
+            "👉 Ejemplo: <code>/programar 08:30</code>"
+        )
+        await query.edit_message_text(text=mensaje, parse_mode="HTML")
+        
+    # Aquí irían tus otros botones (sacar carta, ver diccionario, etc.)
+    elif query.data == "sacar_carta":
+        # ... tu código actual para sacar cartas ...
+        pass
 
     # --- MENÚ DE INICIO ---
     if query.data == 'volver_inicio':
