@@ -1,7 +1,7 @@
 import json
 import random
 import logging
-import os  # 👈 ¡ESTA ES LA LÍNEA QUE FALTA!
+import os
 import pytz
 from datetime import time
 import datetime
@@ -22,7 +22,7 @@ def obtener_menu_principal():
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
         [InlineKeyboardButton("🃏 Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
-        [InlineKeyboardButton("🔮 Significado de los Arcanos", callback_data='ver_arcanos')]
+        [InlineKeyboardButton("🧿 Significado de los Arcanos", callback_data='ver_arcanos')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -79,7 +79,7 @@ def obtener_botones_menores(rango_inicio, rango_fin):
     keyboard.append([InlineKeyboardButton("⬅️ Atrás", callback_data='cat_menores')])
     return InlineKeyboardMarkup(keyboard)
 
-# Función auxiliar para generar la tirada (NUEVO: Separada para reutilizarla)
+# Función auxiliar para generar la tirada
 def generar_texto_y_ruta_tirada():
     carta_id = str(random.randint(0, 77))
     carta = tarot_db[carta_id]
@@ -100,28 +100,28 @@ def generar_texto_y_ruta_tirada():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = update.effective_user.first_name
     
-    # 🚨 Modificamos el texto para usar etiquetas HTML limpias
+    # Modificamos el texto para usar etiquetas HTML limpias
     mensaje = (
-        f"¡Hola, {usuario}! 🔮 Bienvenido al <b>Tarot de Marsella</b>.\n\n"
-        "Puedes pedir una carta en cualquier momento o programar tu carta diaria usando el comando:\n"
-        "<code>/programar HH:MM</code> (Ejemplo: <code>/programar 08:30</code>)\n\n"
+        f"¡Hola, {usuario}! 🔮 Bienvenido a <b>Mozárabe Tarot</b>.\n\n"
+        "Puedes pedir una carta como tirada del día, tirada de tres cartas, o programar tu carta diaria usando el comando:\n"
+        "<code>/programar HH:MM</code>en formato 24 horas. (Ejemplo: <code>/programar 08:30</code>)\n\n"
         "¿Qué deseas consultar hoy?"
     )
     
-    # ✅ Cambiamos parse_mode a "HTML"
+    # Cambiamos parse_mode a "HTML"
     await update.message.reply_text(
         text=mensaje, 
         reply_markup=obtener_menu_principal(), 
         parse_mode="HTML"
     )
 
-# NUEVO: Función que se ejecuta automáticamente a la hora programada
+# Función que se ejecuta automáticamente a la hora programada
 async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
     chat_id = job.chat_id
     
     texto_final, ruta_imagen, carta_id = generar_texto_y_ruta_tirada()
-    texto_automatico = f"🔮 **¡Tu Carta del Día Automática ha llegado!** 🔮\n\n{texto_final}"
+    texto_automatico = f"🔮 **¡Tu carta del día automática ha llegado!** 🔮\n\n{texto_final}"
     
     try:
         with open(ruta_imagen, 'rb') as foto:
@@ -159,7 +159,7 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
             tarea.schedule_removal()
             
         # Programar la nueva tarea diaria
-       # Define tu zona horaria (por ejemplo, "America/Mexico_City" o tu zona local)
+        # Define la zona horaria (por ejemplo, "America/Mexico_City" o tu zona local)
         zona_horaria = pytz.timezone("America/Mexico_City")
         # Programar la nueva tarea diaria con la zona horaria explícita
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
@@ -190,7 +190,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "menu_programar":  
         mensaje = (
             "⏰ <b>Para programar tu carta diaria:</b>\n\n"
-            "Escríbeme el comando <code>/programar</code> seguido de la hora en formato 24h.\n\n"
+            "Escríbeme el comando <code>/programar</code> seguido de la hora en formato 24 horas.\n\n"
             "👉 Ejemplo: <code>/programar 08:30</code>"
         )
         await query.edit_message_text(text=mensaje, parse_mode="HTML")
@@ -253,8 +253,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == 'volver_inicio':
         usuario = update.effective_user.first_name
         mensaje = (
-            f"¡Hola, {usuario}! 🔮 Bienvenido al **Tarot de Marsella**.\n\n"
-            "Puedes pedir una carta en cualquier momento o programar tu carta diaria usando el comando:\n"
+            f"¡Hola, {usuario}! 🔮 Bienvenido a **Mozárabe Tarot**.\n\n"
+            "Puedes pedir una carta como tirada del día, tirada de tres cartas, o programar tu carta diaria usando el comando:\n"
             "`/programar HH:MM`\n\n"
             "¿Qué deseas consultar hoy?"
         )
@@ -291,7 +291,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- CATEGORÍAS DE DICCIONARIO ---
     elif query.data == 'ver_arcanos':
-        texto_menu = "🔮 **Diccionario de Arcanos**\n\n¿Qué grupo de cartas deseas consultar hoy?"
+        texto_menu = "🧿 **Significado de Arcanos**\n\n¿Qué grupo de cartas deseas consultar hoy?"
         
         # Si venimos de ver una carta (que es una foto), borramos y enviamos texto fresco
         if query.message.photo:
@@ -429,7 +429,7 @@ def main():
     # Buscamos la variable
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
     
-    # 🚨 VALIDACIÓN CRÍTICA: Si es None o está vacío, detenemos el bot con un mensaje
+    # VALIDACIÓN CRÍTICA: Si es None o está vacío, detenemos el bot con un mensaje
     if not TOKEN:
         raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe en Railway.")
         
