@@ -258,18 +258,11 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             texto_lectura += f"📖 <i>{significado}</i>\n\n"
             
         # 3. Enviamos el mensaje con la interpretación completa
-        # Editamos el mensaje original para poner el texto final
+        # Editamos el mensaje original para poner el texto final (eliminamos el send_photo duplicado)
         await query.edit_message_text(
             text=texto_lectura,
             parse_mode="HTML"
         )
-            
-        # 3. Enviamos el mensaje con la interpretación completa
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=texto_lectura,
-            parse_mode="HTML"
-        ) 
 
     # Aquí irían tus otros botones (sacar carta, ver diccionario, etc.)
     elif query.data == "sacar_carta":
@@ -297,13 +290,65 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'tirada_dia':
         # Borramos el menú para enviar la foto fresca
         await query.message.delete()
-        texto_final, ruta_imagen, carta_id = generar_texto_y_ruta_tirada()
+        
+        # 1. Sacamos 1 sola carta al azar
+        claves_cartas = list(tarot_db.keys())
+        carta_id = random.choice(claves_cartas)
+        datos_carta = tarot_db[carta_id]
+        
+        nombre_real = datos_carta['nombre']
+        
+        # 2. 🎲 TIRAMOS LA MONEDA: ¿Sale al derecho o al revés?
+        esta_invertida = random.choice([True, False])
+        
+        if esta_invertida:
+            significado = datos_carta['significado_invertido']
+            titulo_carta = f"{nombre_real} (Invertida 🙃)"
+        else:
+            significado = datos_carta['significado_derecho']
+            titulo_carta = f"{nombre_real} (Al derecho ⭐)"
+            
+        # Armamos el texto en Markdown (como lo tenías)
+        texto_final = f"🌟 *TU CARTA DEL DÍA* 🌟\n\n📍 *{titulo_carta}*\n📖 _{significado}_"
+        ruta_imagen = f"imagenes/{carta_id}.jpg"
+        
+        # 3. Procesamos y enviamos la imagen con el texto
         try:
-            with open(ruta_imagen, 'rb') as foto:
-                await query.message.reply_photo(photo=foto, caption=texto_final, parse_mode="Markdown", reply_markup=obtener_menu_principal())
+            if esta_invertida:
+                # Abrimos, giramos 180 grados y guardamos en memoria
+                imagen_original = Image.open(ruta_imagen)
+                imagen_girada = imagen_original.rotate(180)
+                
+                memoria = io.BytesIO()
+                memoria.name = 'girada.jpg'
+                imagen_girada.save(memoria, 'JPEG')
+                memoria.seek(0)
+                
+                # Enviamos la foto girada con su caption y menú
+                await query.message.reply_photo(
+                    photo=memoria, 
+                    caption=texto_final, 
+                    parse_mode="Markdown", 
+                    reply_markup=obtener_menu_principal()
+                )
+            else:
+                # Si está al derecho, la enviamos normal
+                with open(ruta_imagen, 'rb') as foto:
+                    await query.message.reply_photo(
+                        photo=foto, 
+                        caption=texto_final, 
+                        parse_mode="Markdown", 
+                        reply_markup=obtener_menu_principal()
+                    )
             await query.answer()
+            
         except FileNotFoundError:
-            await query.message.reply_text(text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_final}", parse_mode="Markdown", reply_markup=obtener_menu_principal())
+            # Si no hay foto, enviamos solo el texto
+            await query.message.reply_text(
+                text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_final}", 
+                parse_mode="Markdown", 
+                reply_markup=obtener_menu_principal()
+            )
             await query.answer()
 
     # --- CONFIGURAR ALARMA ---
