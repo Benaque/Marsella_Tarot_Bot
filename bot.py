@@ -7,6 +7,8 @@ from datetime import time
 import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+import io
+from PIL import Image
 
 # Configuración de registros
 logging.basicConfig(
@@ -215,19 +217,44 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             posicion = posiciones[i]
             
             nombre_real = datos_carta['nombre']
-            significado = datos_carta['significado_derecho']
+            
+            # 🎲 TIRAMOS LA MONEDA: ¿Sale al derecho o al revés?
+            esta_invertida = random.choice([True, False])
+            
+            # Asignamos el significado y el título según cómo salió
+            if esta_invertida:
+                significado = datos_carta['significado_invertido']
+                titulo_carta = f"{nombre_real} (Invertida 🙃)"
+            else:
+                significado = datos_carta['significado_derecho']
+                titulo_carta = f"{nombre_real} (Al derecho ⭐)"
             
             # Intentamos enviar la foto
             ruta_imagen = f"imagenes/{clave}.jpg" 
             try:
-                with open(ruta_imagen, 'rb') as foto:
-                    await context.bot.send_photo(chat_id=chat_id, photo=foto)
-            except:
-                # Si falla la foto, no hacemos nada, solo continuamos
+                if esta_invertida:
+                    # Abrimos la imagen, la giramos 180 grados
+                    imagen_original = Image.open(ruta_imagen)
+                    imagen_girada = imagen_original.rotate(180)
+                    
+                    # Guardamos la imagen girada en la memoria (no en el disco)
+                    memoria = io.BytesIO()
+                    memoria.name = 'girada.jpg'
+                    imagen_girada.save(memoria, 'JPEG')
+                    memoria.seek(0)
+                    
+                    # Enviamos la foto girada desde la memoria
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria)
+                else:
+                    # Si está al derecho, la enviamos normal desde el archivo
+                    with open(ruta_imagen, 'rb') as foto:
+                        await context.bot.send_photo(chat_id=chat_id, photo=foto)
+            except Exception as e:
+                print(f"Error procesando la imagen {ruta_imagen}: {e}")
                 pass 
             
-            # Acumulamos el texto SIEMPRE
-            texto_lectura += f"📍 <b>{posicion}: {nombre_real}</b>\n"
+            # Acumulamos el texto final
+            texto_lectura += f"📍 <b>{posicion}: {titulo_carta}</b>\n"
             texto_lectura += f"📖 <i>{significado}</i>\n\n"
             
         # 3. Enviamos el mensaje con la interpretación completa
