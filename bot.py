@@ -23,7 +23,7 @@ def obtener_menu_principal():
     keyboard = [
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
-        [InlineKeyboardButton("🧚🏼‍♀️ Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
+        [InlineKeyboardButton("🎲 Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
         [InlineKeyboardButton("🧿 Significado de los Arcanos", callback_data='ver_arcanos')]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -31,8 +31,8 @@ def obtener_menu_principal():
 # Menú para elegir entre Mayores o Menores
 def obtener_menu_categorias():
     keyboard = [
-        [InlineKeyboardButton("🎵 Arcanos Mayores", callback_data='cat_mayores')],
-        [InlineKeyboardButton("🎶 Arcanos Menores", callback_data='cat_menores')],
+        [InlineKeyboardButton("🪄 Arcanos Mayores", callback_data='cat_mayores')],
+        [InlineKeyboardButton("🪆 Arcanos Menores", callback_data='cat_menores')],
         [InlineKeyboardButton("⬆️ Volver al Menú Principal", callback_data='volver_inicio')]
     ]
     return InlineKeyboardMarkup(keyboard)
