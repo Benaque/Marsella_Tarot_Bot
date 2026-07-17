@@ -41,7 +41,7 @@ def obtener_menu_categorias():
 def obtener_menu_palos():
     keyboard = [
         [InlineKeyboardButton("🪵 Bastos", callback_data='palo_bastos'),
-         InlineKeyboardButton("🏆 Copas", callback_data='palo_copas')],
+         InlineKeyboardButton("🥂 Copas", callback_data='palo_copas')],
         [InlineKeyboardButton("⚔️ Espadas", callback_data='palo_espadas'),
          InlineKeyboardButton("🪙 Oros", callback_data='palo_oros')],
         [InlineKeyboardButton("⬅️ Atrás", callback_data='ver_arcanos')]
@@ -331,17 +331,17 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.edit_text(text=texto_menu, reply_markup=obtener_menu_categorias(), parse_mode="HTML")
 
     elif query.data == 'cat_mayores':
-        await query.message.edit_text(text="🃏 <b>Arcanos Mayores</b>\n\nSelecciona el arcano que deseas estudiar:", reply_markup=obtener_botones_mayores(), parse_mode="HTML")
+        await query.message.edit_text(text="🪄 <b>Arcanos Mayores</b>\n\nSelecciona el arcano que deseas estudiar:", reply_markup=obtener_botones_mayores(), parse_mode="HTML")
 
     elif query.data == 'cat_menores':
-        await query.message.edit_text(text="🌿 <b>Arcanos Menores</b>\n\nSelecciona el palo que deseas consultar:", reply_markup=obtener_menu_palos(), parse_mode="HTML")
+        await query.message.edit_text(text="🪆 <b>Arcanos Menores</b>\n\nSelecciona el palo que deseas consultar:", reply_markup=obtener_menu_palos(), parse_mode="HTML")
 
     # --- PALOS ESPECÍFICOS ---
     elif query.data == 'palo_bastos':
         await query.message.edit_text(text="🪵 <b>Palo de Bastos</b> (Acción y Energía):", reply_markup=obtener_botones_menores(22, 35), parse_mode="HTML")
 
     elif query.data == 'palo_copas':
-        await query.message.edit_text(text="🏆 <b>Palo de Copas</b> (Emociones y Amor):", reply_markup=obtener_botones_menores(36, 49), parse_mode="HTML")
+        await query.message.edit_text(text="🥂 <b>Palo de Copas</b> (Emociones y Amor):", reply_markup=obtener_botones_menores(36, 49), parse_mode="HTML")
 
     elif query.data == 'palo_espadas':
         await query.message.edit_text(text="⚔️ <b>Palo de Espadas</b> (Mente y Conflictos):", reply_markup=obtener_botones_menores(50, 63), parse_mode="HTML")
