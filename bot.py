@@ -24,7 +24,7 @@ def obtener_menu_principal():
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
         [InlineKeyboardButton("🎲 Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
-        [InlineKeyboardButton("🧿 Significado de los Arcanos", callback_data='ver_arcanos')]
+        [InlineKeyboardButton("❓ Significado de los Arcanos", callback_data='ver_arcanos')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -320,7 +320,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # --- CATEGORÍAS DE DICCIONARIO ---
     elif query.data == 'ver_arcanos':
-        texto_menu = "🧿 <b>Significado de Arcanos</b>\n\n¿Qué grupo de cartas deseas consultar hoy?"
+        texto_menu = "❓ <b>Significado de Arcanos</b>\n\n¿Qué grupo de cartas deseas consultar hoy?"
         if query.message.photo:
             try:
                 await query.message.delete()
