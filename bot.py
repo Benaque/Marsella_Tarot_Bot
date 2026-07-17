@@ -2,7 +2,6 @@ import json
 import random
 import logging
 import os
-import asyncio
 from datetime import time
 from zoneinfo import ZoneInfo
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -220,7 +219,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     bot = context.bot
 
-    # ==================== MENÚ PROGRAMAR ====================
     if query.data == 'menu_programar':
         mensaje = (
             "⏰ <b>Configuración de tu Alarma Diaria</b>\n\n"
@@ -234,7 +232,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.message.edit_text(text=mensaje, parse_mode="HTML", reply_markup=obtener_menu_principal())
 
-    # ==================== TIRADA DE 3 CARTAS ====================
     elif query.data == "menu_tres_cartas":
         if query.message and query.message.photo:
             await query.message.delete()
@@ -265,7 +262,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=obtener_menu_principal()
         )
 
-    # ==================== VOLVER AL INICIO ====================
     elif query.data == 'volver_inicio':
         usuario = update.effective_user.first_name
         mensaje = (
@@ -278,7 +274,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await query.message.edit_text(text=mensaje, reply_markup=obtener_menu_principal(), parse_mode="Markdown")
 
-    # ==================== TIRADA DEL DÍA ====================
     elif query.data == 'tirada_dia':
         if query.message:
             await query.message.delete()
@@ -286,7 +281,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         texto_dia = f"🌟 *TU CARTA DEL DÍA* 🌟\n\n{texto_final}"
         await send_card_photo(chat_id, bot, ruta_imagen, texto_dia, esta_invertida)
 
-    # ==================== DICCIONARIO DE ARCANO ====================
     elif query.data == 'ver_arcanos':
         texto = "🧿 **Significado de Arcanos**\n\n¿Qué grupo de cartas deseas consultar hoy?"
         if query.message and query.message.photo:
