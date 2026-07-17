@@ -383,7 +383,7 @@ def main():
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
     
-    print("🔮 El bot del Tarot de Marsella en la nube está en marcha...")
+    print("🔮 El bot de Mozárabe Tarot en la nube está en marcha...")
     app.run_polling()
 
 if __name__ == '__main__':
