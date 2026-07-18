@@ -31,7 +31,7 @@ def obtener_menu_principal():
 # Menú para elegir entre Mayores o Menores
 def obtener_menu_categorias():
     keyboard = [
-        [InlineKeyboardButton("🪄 Arcanos Mayores", callback_data='cat_mayores')],
+        [InlineKeyboardButton("🧙‍♂️ Arcanos Mayores", callback_data='cat_mayores')],
         [InlineKeyboardButton("🪆 Arcanos Menores", callback_data='cat_menores')],
         [InlineKeyboardButton("⬆️ Volver al Menú Principal", callback_data='volver_inicio')]
     ]
@@ -102,7 +102,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = update.effective_user.first_name
     mensaje = (
         f"¡Hola, {usuario}! 🔮 Bienvenido a <b>Mozárabe Tarot</b>.\n\n"
-        "Puedes pedir una carta como tirada del día, tirada de tres cartas, o programar tu carta diaria usando el comando:\n"
+        "Puedes pedir una carta como tirada del día, tirada de tres cartas o, programar tu carta diaria usando el comando:\n"
         "<code>/programar HH:MM</code> en formato 24 horas. (Ejemplo: <code>/programar 08:30</code>)\n\n"
         "¿Qué deseas consultar hoy?"
     )
@@ -118,7 +118,7 @@ async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     chat_id = job.chat_id
     
     texto_final, ruta_imagen, carta_id, esta_invertida = generar_datos_carta_aleatoria()
-    texto_automatico = f"🔮 <b>¡Tu carta del día automática ha llegado!</b> 🔮\n\n{texto_final}"
+    texto_automatico = f"🧞‍♀️ <b>¡Tu carta del día automática ha llegado!</b> 🧞‍♂️\n\n{texto_final}"
     
     try:
         if esta_invertida:
@@ -191,7 +191,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # --- CONFIGURAR ALARMA ---
     if query.data == 'menu_programar':
         mensaje_instrucciones = (
-            "⏰ <b>Configuración de tu Alarma Diaria</b>\n\n"
+            "⏰ <b>Configuración de tu alarma diaria</b>\n\n"
             "Para recibir tu carta automáticamente, escribe en el chat el comando <code>/programar</code> seguido de la hora.\n\n"
             "👉 <b>Ejemplo:</b> <code>/programar 08:30</code>"
         )
@@ -280,7 +280,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         usuario = update.effective_user.first_name
         mensaje = (
             f"¡Hola, {usuario}! 🔮 Bienvenido a <b>Mozárabe Tarot</b>.\n\n"
-            "Puedes pedir una carta como tirada del día, tirada de tres cartas, o programar tu carta diaria usando el comando:\n"
+            "Puedes pedir una carta como tirada del día, tirada de tres cartas o, programar tu carta diaria usando el comando:\n"
             "<code>/programar HH:MM</code>\n\n"
             "¿Qué deseas consultar hoy?"
         )
@@ -331,7 +331,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.edit_text(text=texto_menu, reply_markup=obtener_menu_categorias(), parse_mode="HTML")
 
     elif query.data == 'cat_mayores':
-        await query.message.edit_text(text="🪄 <b>Arcanos Mayores</b>\n\nSelecciona el arcano que deseas indagar:", reply_markup=obtener_botones_mayores(), parse_mode="HTML")
+        await query.message.edit_text(text="🧙‍♂️ <b>Arcanos Mayores</b>\n\nSelecciona el arcano que deseas indagar:", reply_markup=obtener_botones_mayores(), parse_mode="HTML")
 
     elif query.data == 'cat_menores':
         await query.message.edit_text(text="🪆 <b>Arcanos Menores</b>\n\nSelecciona el palo que deseas consultar:", reply_markup=obtener_menu_palos(), parse_mode="HTML")
@@ -354,9 +354,9 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         carta_id = query.data.split('_')[1]
         carta = tarot_db[carta_id]
         texto_info = (
-            f"🔮 <b>{carta['nombre']}</b>\n\n"
-            f"🟢 <b>Al Derecho:</b>\n{carta['significado_derecho']}\n\n"
-            f"🔴 <b>Invertida:</b>\n{carta['significado_invertido']}"
+            f"💫 <b>{carta['nombre']}</b>\n\n"
+            f"🍄 <b>Al Derecho:</b>\n{carta['significado_derecho']}\n\n"
+            f"🍄‍🟫 <b>Invertida:</b>\n{carta['significado_invertido']}"
         )
         
         try:
