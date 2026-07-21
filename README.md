@@ -33,4 +33,3 @@ python-telegram-bot v21
 Pillow (para rotación de cartas)
 
 Proyecto administrado por @josebenaque en Telegram
-<img width="784" height="1168" alt="Marsella Tarot cover" src="https://github.com/user-attachments/assets/76679126-752c-4544-8894-edf002f3f9ce" />
