@@ -38,14 +38,14 @@ source venv/bin/activate
 ./venv/bin/python bot.py
 ```
 
-📋 Variables de Entorno Requeridas
+📋 **Variables de Entorno Requeridas**
 
 TELEGRAM_TOKEN → Token proporcionado por @BotFather
 
-🛠 Tecnologías
+🛠 **Tecnologías**
 
 Python 3.12
 python-telegram-bot v21
 Pillow (para rotación de cartas)
 
-Administración: @josebenaque en Telegram
+👨‍💻 Administración: @josebenaque en Telegram
