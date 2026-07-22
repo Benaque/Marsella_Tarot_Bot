@@ -7,9 +7,9 @@ Bot de Tarot basado en el Tarot de Marsella con tiradas diarias, programación a
 
 Interpretaciones personales comparadas con las obras:
 
-- **La voie du Tarot. Alejandro Jodorowsky, Marianne Costa.** Penguin Random House Grupo Editorial. 14a. reimpresión. México, mayo de 2023.
-- **The Ultimate Guide to the Tarot Rider Waite. Johannes Fiebig, Evelin Bürger.** Arkano Books. 3a. reimpresión, India, septiembre de 2022.
-- **Helping yourself with numerology. Heyln Hitchcock.** Editorial Kier, S.A. Argentina, octubre de 1993.
+- La voie du Tarot. Alejandro Jodorowsky, Marianne Costa. Penguin Random House Grupo Editorial. 14a. reimpresión. México, mayo de 2023.
+- The Ultimate Guide to the Tarot Rider Waite. Johannes Fiebig, Evelin Bürger. Arkano Books. 3a. reimpresión, India, septiembre de 2022.
+- Helping yourself with numerology. Heyln Hitchcock. Editorial Kier, S.A. Argentina, octubre de 1993.
 
 ## ✨ Funcionalidades
 
@@ -30,6 +30,7 @@ pip install -r requirements.txt
 
 # Ejecutar el bot
 python bot.py
+```
 
 📋 Variables de Entorno Requeridas
 
