@@ -1,6 +1,6 @@
 # 🔮 Mozárabe Tarot - Bot de Telegram
 
-Bot de Tarot basado en el Tarot de Marsella con tiradas diarias, programación automática y diccionario completo de arcanos.
+Bot de tarot aleatorio basado en el **Tarot de Marsella**.
 
 
 ## 🫖 Contenido 
