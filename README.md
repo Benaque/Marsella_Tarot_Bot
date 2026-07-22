@@ -3,7 +3,7 @@
 Bot de Tarot basado en el Tarot de Marsella con tiradas diarias, programación automática y diccionario completo de arcanos.
 
 
-## 🫗 Contenido 
+## 🫖 Contenido 
 
 Interpretaciones personales comparadas con las obras:
 
