@@ -14,8 +14,8 @@ Interpretaciones personales comparadas con las obras:
 
 ## ✨ Funcionalidades
 
-- **Tirada del día** Una carta
-- **Tirada de tres cartas** Simbolizan una vista rápida del mpasado, presente y futuro
+- **Tirada del día**: una carta aleatoria que simboliza el consejo del día
+- **Tirada de tres cartas**: tres cartas aleatorias que simbolizan una lectura rápida del pasado, presente y futuro
 - **Programación diaria automática** Mediante comando `/programar HH:MM`
 - **Breve interpretación** de los 78 Arcanos: Mayores y Menores
 - Soporte para cartas **invertidas** Imágenes rotadas y su significado
@@ -49,4 +49,6 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 - python-telegram-bot v21
 - Pillow (para rotación de cartas)
 
-🧙‍♂️ Administración: @josebenaque en Telegram
+🧙‍♂️ Administración: Telegram: @josebenaque 📬 jfk4dk10r@mozmail.com
+Este bot tiene fines de entretenimiento y no busca sustituir a ningún ser humano. La interpretación que se ha colocado es meramente subjetiva y de acuerdo al punto de vista del administrador. Se recomienda acudir con tarotistas profesionales para lecturas personalizadas.
+👾
