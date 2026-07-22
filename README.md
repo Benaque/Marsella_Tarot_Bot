@@ -44,8 +44,8 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 
 ## 🛠 **Tecnologías**
 
-Python 3.12
-python-telegram-bot v21
-Pillow (para rotación de cartas)
+- Python 3.12
+- python-telegram-bot v21
+- Pillow (para rotación de cartas)
 
 🧙‍♂️ Administración: @josebenaque en Telegram
