@@ -10,7 +10,6 @@ Interpretaciones personales comparadas con las obras:
 - La voie du Tarot. Alejandro Jodorowsky, Marianne Costa. Penguin Random House. 14a reimpresión. Ciudad de México, mayo 2023.
 - The Ultimate Guide to the Tarot Rider Waite. Johannes Fiebig, Evelin Bürger. Arkano Books. 3a reimpresión, Nueva Delhi, septiembre 2022.
 - Helping yourself with numerology. Heyln Hitchcock. Editorial Kier, S.A. 4a edición. Buenos Aires, octubre 1993.
-- El Tarot de Marsella. Julian M. White. Editorial Sirio. S/I impresión. Málaga, agosto 2024.
 
 ## ✨ Funcionalidades
 
@@ -49,6 +48,6 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 - python-telegram-bot v21
 - Pillow (para rotación de cartas)
 
-🧙‍♂️ Administración: Telegram: @josebenaque 📬 jfk4dk10r@mozmail.com
-Este bot tiene fines de entretenimiento y no busca sustituir a ningún ser humano. La interpretación que se ha colocado es meramente subjetiva y de acuerdo al punto de vista del administrador. Se recomienda acudir con tarotistas profesionales para lecturas personalizadas.
-👾
+🧙‍♂️ E-mail: jfk4dk10r@mozmail.com 📬
+
+👾 Este bot fue diseñado únicamente para fines de entretenimiento y no busca sustituir a ningún ser humano. La interpretación que se ha colocado es meramente subjetiva, con comentarios personales y citas de diversos autores a las que se pueden relacionar a cada carta. Para lecturas personalizadas, se recomienda acudir con tarotistas profesionales.
