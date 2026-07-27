@@ -7,18 +7,18 @@ Bot de tarot aleatorio basado en el **Tarot de Marsella**.
 
 Interpretaciones personales comparadas con las obras:
 
-- La voie du Tarot. Alejandro Jodorowsky, Marianne Costa. Penguin Random House. 14a reimpresión. Ciudad de México, mayo 2023.
-- The Ultimate Guide to the Tarot Rider Waite. Johannes Fiebig, Evelin Bürger. Arkano Books. 3a reimpresión, Nueva Delhi, septiembre 2022.
-- Helping yourself with numerology. Heyln Hitchcock. Editorial Kier, S.A. 4a edición. Buenos Aires, octubre 1993.
+- *La voie du Tarot*. Alejandro Jodorowsky, Marianne Costa. Penguin Random House. 14a reimpresión. Ciudad de México, mayo 2023.
+- *The Ultimate Guide to the Tarot Rider Waite*. Johannes Fiebig, Evelin Bürger. Arkano Books. 3a reimpresión, Nueva Delhi, septiembre 2022.
+- *Helping yourself with numerology*. Heyln Hitchcock. Editorial Kier, S.A. 4a edición. Buenos Aires, octubre 1993.
 
 ## ✨ Funcionalidades
 
 - **Tirada del día**: una carta aleatoria que simboliza el consejo del día
 - **Tirada de tres cartas**: tres cartas aleatorias que simbolizan una lectura rápida del pasado, presente y futuro
-- **Programación diaria automática** Mediante comando `/programar HH:MM`
+- **Programación diaria automática** Mediante comando: `/programar HH:MM`
 - **Breve interpretación** de los 78 Arcanos: Mayores y Menores
 - Soporte para cartas **invertidas** Imágenes rotadas y su significado
-- Interfaz con botones interactivos
+- Interfaz con botones interactivos, diseñado para interfaz móvil y de escritorio en Telegram
 
 ## 📁 Estructura del Proyecto
 
