@@ -23,60 +23,8 @@ def obtener_menu_principal():
     keyboard = [
         [InlineKeyboardButton("🃏 Tirada del Día (1 carta)", callback_data='tirada_dia')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
-        [InlineKeyboardButton("🎲 Tirada de 3 Cartas", callback_data='menu_tres_cartas')],
-        [InlineKeyboardButton("❓ Significado de los Arcanos", callback_data='ver_arcanos')]
+        [InlineKeyboardButton("🎲 Tirada de 3 Cartas", callback_data='menu_tres_cartas')]
     ]
-    return InlineKeyboardMarkup(keyboard)
-
-# Menú para elegir entre Mayores o Menores
-def obtener_menu_categorias():
-    keyboard = [
-        [InlineKeyboardButton("🧙‍♂️ Arcanos Mayores", callback_data='cat_mayores')],
-        [InlineKeyboardButton("🪆 Arcanos Menores", callback_data='cat_menores')],
-        [InlineKeyboardButton("⬆️ Volver al Menú Principal", callback_data='volver_inicio')]
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-# Menú para elegir el palo de los Arcanos Menores
-def obtener_menu_palos():
-    keyboard = [
-        [InlineKeyboardButton("🪵 Bastos", callback_data='palo_bastos'),
-         InlineKeyboardButton("🥂 Copas", callback_data='palo_copas')],
-        [InlineKeyboardButton("⚔️ Espadas", callback_data='palo_espadas'),
-         InlineKeyboardButton("🪙 Oros", callback_data='palo_oros')],
-        [InlineKeyboardButton("⬅️ Atrás", callback_data='ver_arcanos')]
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-# Genera botones para los 22 Arcanos Mayores
-def obtener_botones_mayores():
-    keyboard = []
-    fila = []
-    for i in range(22):
-        nombre_corto = tarot_db[str(i)]["nombre"].split(" (")[0]
-        fila.append(InlineKeyboardButton(nombre_corto, callback_data=f"info_{i}"))
-        if len(fila) == 2:
-            keyboard.append(fila)
-            fila = []
-    if fila:
-        keyboard.append(fila)
-    keyboard.append([InlineKeyboardButton("⬅️ Atrás", callback_data='ver_arcanos')])
-    return InlineKeyboardMarkup(keyboard)
-
-# Genera botones para un palo específico de Arcanos Menores
-def obtener_botones_menores(rango_inicio, rango_fin):
-    keyboard = []
-    fila = []
-    for i in range(rango_inicio, rango_fin + 1):
-        nombre_corto = tarot_db[str(i)]["nombre"]
-        nombre_corto = nombre_corto.replace(" de Bastos", "").replace(" de Copas", "").replace(" de Espadas", "").replace(" de Oros", "")
-        fila.append(InlineKeyboardButton(nombre_corto, callback_data=f"info_{i}"))
-        if len(fila) == 3:
-            keyboard.append(fila)
-            fila = []
-    if fila:
-        keyboard.append(fila)
-    keyboard.append([InlineKeyboardButton("⬅️ Atrás", callback_data='cat_menores')])
     return InlineKeyboardMarkup(keyboard)
 
 # Función auxiliar para generar textos e información de cartas
@@ -317,59 +265,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
         except FileNotFoundError:
             await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML", reply_markup=obtener_menu_principal())
-
-    # --- CATEGORÍAS DE DICCIONARIO ---
-    elif query.data == 'ver_arcanos':
-        texto_menu = "❓ <b>Significado de Arcanos</b>\n\n¿Qué grupo de cartas deseas consultar hoy?"
-        if query.message.photo:
-            try:
-                await query.message.delete()
-            except Exception:
-                pass
-            await context.bot.send_message(chat_id=chat_id, text=texto_menu, reply_markup=obtener_menu_categorias(), parse_mode="HTML")
-        else:
-            await query.message.edit_text(text=texto_menu, reply_markup=obtener_menu_categorias(), parse_mode="HTML")
-
-    elif query.data == 'cat_mayores':
-        await query.message.edit_text(text="🧙‍♂️ <b>Arcanos Mayores</b>\n\nSelecciona el arcano que deseas indagar:", reply_markup=obtener_botones_mayores(), parse_mode="HTML")
-
-    elif query.data == 'cat_menores':
-        await query.message.edit_text(text="🪆 <b>Arcanos Menores</b>\n\nSelecciona el palo que deseas consultar:", reply_markup=obtener_menu_palos(), parse_mode="HTML")
-
-    # --- PALOS ESPECÍFICOS ---
-    elif query.data == 'palo_bastos':
-        await query.message.edit_text(text="🪵 <b>Palo de Bastos</b> (acción y energía):", reply_markup=obtener_botones_menores(22, 35), parse_mode="HTML")
-
-    elif query.data == 'palo_copas':
-        await query.message.edit_text(text="🥂 <b>Palo de Copas</b> (emociones y amor):", reply_markup=obtener_botones_menores(36, 49), parse_mode="HTML")
-
-    elif query.data == 'palo_espadas':
-        await query.message.edit_text(text="⚔️ <b>Palo de Espadas</b> (mente y conflictos):", reply_markup=obtener_botones_menores(50, 63), parse_mode="HTML")
-
-    elif query.data == 'palo_oros':
-        await query.message.edit_text(text="🪙 <b>Palo de Oros</b> (material y finanzas):", reply_markup=obtener_botones_menores(64, 77), parse_mode="HTML")
-
-    # --- MOSTRAR INFORMACIÓN DE CARTA SELECCIONADA ---
-    elif query.data.startswith('info_'):
-        carta_id = query.data.split('_')[1]
-        carta = tarot_db[carta_id]
-        texto_info = (
-            f"💫 <b>{carta['nombre']}</b>\n\n"
-            f"🍄 <b>Al Derecho:</b>\n{carta['significado_derecho']}\n\n"
-            f"🍄‍🟫 <b>Invertida:</b>\n{carta['significado_invertido']}"
-        )
-        
-        try:
-            await query.message.delete()
-        except Exception:
-            pass
-            
-        ruta_imagen = f"imagenes/{carta_id}.jpg"
-        try:
-            with open(ruta_imagen, 'rb') as foto:
-                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_info, parse_mode="HTML", reply_markup=obtener_menu_principal())
-        except FileNotFoundError:
-            await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_info}", parse_mode="HTML", reply_markup=obtener_menu_principal())
 
 def main():
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
