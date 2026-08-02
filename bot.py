@@ -143,23 +143,20 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Para recibir tu carta automáticamente, escribe en el chat el comando <code>/programar</code> seguido de la hora.\n\n"
             "👉 <b>Ejemplo:</b> <code>/programar 08:30</code>"
         )
-        if query.message.photo:
-            try:
-                await query.message.delete()
-            except Exception:
-                pass
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=mensaje_instrucciones,
-                parse_mode="HTML",
-                reply_markup=obtener_menu_principal()
-            )
-        else:
-            await query.message.edit_text(
-                text=mensaje_instrucciones,
-                parse_mode="HTML",
-                reply_markup=obtener_menu_principal()
-            )
+        
+        # En lugar de intentar editar un mensaje que podría tener una foto, 
+        # borramos el mensaje actual y enviamos uno nuevo limpio.
+        try:
+            await query.message.delete()
+        except Exception:
+            pass # Si no se puede borrar (por antigüedad u otro error), lo ignoramos
+            
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=mensaje_instrucciones,
+            parse_mode="HTML",
+            reply_markup=obtener_menu_principal()
+        )
 
     # --- TIRADA DE 3 CARTAS ---
     elif query.data == "menu_tres_cartas":
