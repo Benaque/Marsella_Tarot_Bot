@@ -467,14 +467,16 @@ def main():
     
     if WEBHOOK_URL:
         print(f"🔮 Iniciando en modo WEBHOOK en el puerto {PORT}...")
-        url_limpia = WEBHOOK_URL.rstrip('/')
+        # Añadimos strip() para eliminar cualquier espacio invisible accidental
+        url_limpia = WEBHOOK_URL.strip().rstrip('/')
         
         # Usamos el TOKEN como ruta de seguridad para el Webhook
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
             url_path=TOKEN,
-            webhook_url=f"{url_limpia}/{TOKEN}"
+            webhook_url=f"{url_limpia}/{TOKEN}",
+            drop_pending_updates=True  # 🚀 ¡Esto purgará los mensajes atascados y reiniciará la conexión!
         )
     else:
         print("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
