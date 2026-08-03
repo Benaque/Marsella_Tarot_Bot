@@ -107,55 +107,6 @@ def obtener_horoscopo_diario(signo_espanol):
     
     return None
 
-# --- MODIFICACIÓN EN LA LÓGICA DE CARTAS (Limpia) ---
-def generar_datos_carta_aleatoria(signo_usuario=None):
-    claves_cartas = list(tarot_db.keys())
-    carta_id = random.choice(claves_cartas)
-    carta = tarot_db[carta_id]
-    esta_invertida = random.choice([True, False])
-
-    nombre = carta["nombre"]
-    if esta_invertida:
-        titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)"
-        interpretacion = carta["significado_invertido"]
-    else:
-        titulo = f"🃏 <b>{nombre}</b> (Al Derecho ⭐)"
-        interpretacion = carta["significado_derecho"]
-        
-    texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
-    
-    if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
-        astro = DATOS_ASTROLOGICOS[signo_usuario]
-        
-        # Sinergia base de tu archivo bot.py
-        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
-        
-        # Llamada a la API (pasándole el signo en español que extraemos de tu BD)
-        horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
-        
-        if horoscopo_api:
-            # Si la API responde y traduce bien, mostramos ambos
-            texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
-        else:
-            # Si la API o el traductor fallan, mostramos tu texto base con aviso de error
-            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible temporalmente).</i>"
-        
-    ruta_imagen = f"imagenes/{carta_id}.jpg"
-    return texto_final, ruta_imagen, carta_id, esta_invertida
-    
-    # Integración de la Sinergia Astrológica + Aztro API
-    if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
-        astro = DATOS_ASTROLOGICOS[signo_usuario]
-        texto_final += f"\n\n✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
-        
-        # Llamamos a la API gratuita de Aztro usando el nombre del signo en minúsculas
-        horoscopo_api = obtener_horoscopo_aztro(signo_usuario.lower())
-        if horoscopo_api:
-            texto_final += f"\n\n{horoscopo_api}"
-        
-    ruta_imagen = f"imagenes/{carta_id}.jpg"
-    return texto_final, ruta_imagen, carta_id, esta_invertida
-
 # --- BASE DE DATOS SQLITE ---
 os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedirs('data', exist_ok=True)
 DB_NAME = '/app/data/perfiles.db' if os.path.exists('/app') else 'data/perfiles.db'
@@ -235,7 +186,17 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
     
     if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
         astro = DATOS_ASTROLOGICOS[signo_usuario]
-        texto_final += f"\n\n✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
+        
+        # Sinergia base
+        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
+        
+        # Llamada a la API estable y traducción
+        horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
+        
+        if horoscopo_api:
+            texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
+        else:
+            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible temporalmente).</i>"
         
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
