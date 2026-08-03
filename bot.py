@@ -74,36 +74,43 @@ def obtener_teclado_persistente():
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
 # --- NUEVA FUNCIÓN CON API ESTABLE Y TRADUCTOR ---
+from bs4 import BeautifulSoup
+
 def obtener_horoscopo_diario(signo_espanol):
-    """Consulta la API en inglés y traduce el resultado al español."""
+    """Extrae el horóscopo directamente del código fuente web, saltándose las APIs."""
     
-    # 1. Diccionario puente: Traduce tu signo guardado al formato que la API exige
-    traduccion_signos = {
-        "aries": "aries", "tauro": "taurus", "geminis": "gemini",
-        "cancer": "cancer", "leo": "leo", "virgo": "virgo",
-        "libra": "libra", "escorpio": "scorpio", "sagitario": "sagittarius",
-        "capricornio": "capricorn", "acuario": "aquarius", "piscis": "pisces"
+    numeros_signos = {
+        "aries": 1, "tauro": 2, "geminis": 3, "cancer": 4,
+        "leo": 5, "virgo": 6, "libra": 7, "escorpio": 8,
+        "sagitario": 9, "capricornio": 10, "acuario": 11, "piscis": 12
     }
     
-    signo_ingles = traduccion_signos.get(signo_espanol, "aries")
-    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo_ingles}&day=TODAY"
+    signo_num = numeros_signos.get(signo_espanol, 1)
+    url = f"https://www.horoscope.com/us/horoscopes/general/horoscope-general-daily-today.aspx?sign={signo_num}"
     
     try:
-        respuesta = requests.get(url, timeout=7)
+        # Nos camuflamos con una firma de sistema Linux para evitar bloqueos
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'}
+        respuesta = requests.get(url, headers=headers, timeout=7)
+        
         if respuesta.status_code == 200:
-            datos = respuesta.json()
-            horoscopo_ingles = datos.get("data", {}).get("horoscope_data", "")
+            soup = BeautifulSoup(respuesta.text, 'html.parser')
             
-            if horoscopo_ingles:
-                # Limpiar el prefijo de la fecha si la API lo incluye
-                horoscopo_ingles = horoscopo_ingles.split(" - ")[-1] if " - " in horoscopo_ingles else horoscopo_ingles
-                
-                # 2. Traducir el mensaje en tiempo real
-                horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
-                
-                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
+            # Navegamos por el DOM para encontrar el primer párrafo principal
+            main_tag = soup.find('main')
+            if main_tag:
+                p_tag = main_tag.find('p')
+                if p_tag:
+                    parrafo = p_tag.text
+                    # Filtramos la fecha del inicio (ej. "Aug 3, 2026 - ")
+                    horoscopo_ingles = parrafo.split(" - ")[-1] if " - " in parrafo else parrafo
+                    
+                    # Traducimos al vuelo
+                    horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
+                    return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
+                    
     except Exception as e:
-        logging.error(f"⚠️ Error al conectar con API o Traductor: {e}")
+        logging.error(f"⚠️ Error de Scraping o Traducción: {e}")
     
     return None
 
