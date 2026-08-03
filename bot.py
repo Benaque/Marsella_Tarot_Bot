@@ -260,10 +260,6 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
             
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
             
-            if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
-                astro = DATOS_ASTROLOGICOS[signo_usuario]
-                texto_lectura += f"\n\n✨ <i>Sinergia ({astro['nombre']}): Tu energía de {astro['elemento']} influye en esta posición.</i>"
-            
             ruta_imagen = f"imagenes/{clave}.jpg" 
             
             try:
