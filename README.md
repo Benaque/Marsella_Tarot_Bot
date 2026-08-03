@@ -14,12 +14,12 @@ Interpretaciones personales y textos extraídos de las obras:
 
 ## ✨ Funcionalidades
 
-- **Tirada del día**: una carta aleatoria que simboliza el consejo del día
-- **Tirada de tres cartas**: tres cartas aleatorias que simbolizan una lectura rápida del pasado, presente y futuro
+- **Tirada del día**: una carta aleatoria que simboliza el consejo del día y un horóscopo breve
+- **Tirada de tres cartas**: tres cartas aleatorias que simbolizan una lectura rápida sobre el pasado, el presente y el futuro
+- **Tirada de compatibilidad del día** una carta aleatoria para indicar la relación con la persona de otro signo zodiacal
 - **Programación diaria automática** Mediante comando: `/programar HH:MM`
 - Soporte para cartas **invertidas** Imágenes rotadas y su significado
 - Interfaz con botones interactivos, diseñado para interfaz móvil y de escritorio en Telegram
-- Horóscopo del día
 
 ## 📁 Estructura del proyecto
 
