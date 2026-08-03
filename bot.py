@@ -169,7 +169,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
         try:
-            await query.message.delete() # (o await mensaje_espera.delete())
+            await query.message.delete()
         except BadRequest:
             pass
             
@@ -184,9 +184,10 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "menu_tres_cartas":
         if query.message.photo:
             try:
-            await query.message.delete() # (o await mensaje_espera.delete())
-        except BadRequest:
-            pass
+                await query.message.delete()
+            except BadRequest:
+                pass
+            
             mensaje_espera = await context.bot.send_message(
                 chat_id=chat_id,
                 text="🔮 Mezclando el mazo y sacando tus 3 cartas..."
@@ -232,7 +233,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
         try:
             await mensaje_espera.delete()
-        except Exception:
+        except BadRequest:
             pass
 
     # --- MENÚ DE INICIO ---
@@ -246,9 +247,9 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         if query.message.photo:
             try:
-            await query.message.delete() # (o await mensaje_espera.delete())
-        except BadRequest:
-            pass
+                await query.message.delete()
+            except BadRequest:
+                pass
             await context.bot.send_message(chat_id=chat_id, text=mensaje, reply_markup=obtener_menu_principal(), parse_mode="HTML")
         else:
             await query.message.edit_text(text=mensaje, reply_markup=obtener_menu_principal(), parse_mode="HTML")
@@ -256,7 +257,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # --- TIRADA DEL DÍA ---
     elif query.data == 'tirada_dia':
         try:
-            await query.message.delete() # (o await mensaje_espera.delete())
+            await query.message.delete()
         except BadRequest:
             pass
             
