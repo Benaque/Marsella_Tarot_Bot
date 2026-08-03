@@ -195,7 +195,7 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         astro = DATOS_ASTROLOGICOS[signo_usuario]
         
         # Sinergia base
-        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
+        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, enfoca el mensaje en {astro['enfoque']}."
         
         # Llamada a la API estable y traducción
         horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
