@@ -114,6 +114,7 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
 
+# --- MODIFICADO: Comando /start con imagen de bienvenida ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = update.effective_user.first_name
     mensaje = (
@@ -122,11 +123,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "o configurar tu signo zodiacal para recibir sinergias personalizadas.\n\n"
         "¿Qué deseas consultar hoy?"
     )
-    await update.message.reply_text(
-        text=mensaje, 
-        reply_markup=obtener_menu_principal(), 
-        parse_mode="HTML"
-    )
+    
+    ruta_bienvenida = "imagenes/5L5ZT.jpg"
+    
+    try:
+        with open(ruta_bienvenida, 'rb') as foto:
+            await update.message.reply_photo(
+                photo=foto,
+                caption=mensaje, 
+                reply_markup=obtener_menu_principal(), 
+                parse_mode="HTML"
+            )
+    except FileNotFoundError:
+        print(f"⚠️ Imagen de bienvenida no encontrada en {ruta_bienvenida}")
+        await update.message.reply_text(
+            text=mensaje, 
+            reply_markup=obtener_menu_principal(), 
+            parse_mode="HTML"
+        )
 
 async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
@@ -318,6 +332,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except BadRequest:
                 pass
 
+    # --- MODIFICADO: Menú de inicio con imagen de bienvenida ---
     elif query.data == 'volver_inicio':
         usuario = update.effective_user.first_name
         mensaje = (
@@ -326,14 +341,30 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "o configurar tu signo zodiacal para recibir sinergias personalizadas.\n\n"
             "¿Qué deseas consultar hoy?"
         )
-        if query.message.photo:
-            try:
-                await query.message.delete()
-            except BadRequest:
-                pass
-            await context.bot.send_message(chat_id=chat_id, text=mensaje, reply_markup=obtener_menu_principal(), parse_mode="HTML")
-        else:
-            await query.message.edit_text(text=mensaje, reply_markup=obtener_menu_principal(), parse_mode="HTML")
+        ruta_bienvenida = "imagenes/5L5ZT.jpg"
+        
+        try:
+            await query.message.delete()
+        except BadRequest:
+            pass
+            
+        try:
+            with open(ruta_bienvenida, 'rb') as foto:
+                await context.bot.send_photo(
+                    chat_id=chat_id, 
+                    photo=foto, 
+                    caption=mensaje, 
+                    reply_markup=obtener_menu_principal(), 
+                    parse_mode="HTML"
+                )
+        except FileNotFoundError:
+            print(f"⚠️ Imagen de bienvenida no encontrada en {ruta_bienvenida}")
+            await context.bot.send_message(
+                chat_id=chat_id, 
+                text=mensaje, 
+                reply_markup=obtener_menu_principal(), 
+                parse_mode="HTML"
+            )
 
     elif query.data == 'tirada_dia':
         perfiles = cargar_perfiles()
