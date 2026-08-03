@@ -8,8 +8,8 @@ import sqlite3
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from telegram.error import BadRequest
 from PIL import Image
 
@@ -18,7 +18,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-# Cargar la base de datos de Tarot (Esto sí puede ser JSON porque es de solo lectura)
+# Cargar la base de datos de Tarot
 with open('tarot_db.json', 'r', encoding='utf-8') as f:
     tarot_db = json.load(f)
 
@@ -38,10 +38,9 @@ DATOS_ASTROLOGICOS = {
     "piscis": {"nombre": "♓ Piscis", "elemento": "Agua 💧", "enfoque": "la empatía, la fantasía y la espiritualidad"}
 }
 
+# --- MENÚS ---
 def obtener_menu_principal():
     keyboard = [
-        [InlineKeyboardButton("🃏 Tirada del Día", callback_data='tirada_dia'),
-         InlineKeyboardButton("🎲 3 Cartas", callback_data='menu_tres_cartas')],
         [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
         [InlineKeyboardButton("⚙️ Configurar mi Signo", callback_data='menu_signo')]
     ]
@@ -65,13 +64,18 @@ def obtener_menu_signos():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# --- NUEVO: INTEGRACIÓN CON SQLITE ---
-# Definimos la ruta de la base de datos apuntando al Volumen de Railway
+def obtener_teclado_persistente():
+    keyboard = [
+        [KeyboardButton("🃏 Tirada del Día"), KeyboardButton("🎲 3 Cartas")],
+        [KeyboardButton("⚙️ Menú de Ajustes")]
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
+
+# --- BASE DE DATOS SQLITE ---
 os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedirs('data', exist_ok=True)
 DB_NAME = '/app/data/perfiles.db' if os.path.exists('/app') else 'data/perfiles.db'
 
 def init_db():
-    """Crea la tabla de perfiles si no existe en SQLite."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('''
@@ -86,7 +90,6 @@ def init_db():
     conn.close()
 
 def obtener_perfil(chat_id):
-    """Obtiene el perfil de un solo usuario desde SQLite."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('SELECT hora, minuto, signo FROM perfiles WHERE chat_id = ?', (str(chat_id),))
@@ -97,7 +100,6 @@ def obtener_perfil(chat_id):
     return {}
 
 def obtener_todos_perfiles():
-    """Obtiene todos los perfiles para restaurar alarmas al inicio."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute('SELECT chat_id, hora, minuto, signo FROM perfiles')
@@ -110,7 +112,6 @@ def obtener_todos_perfiles():
     return perfiles
 
 def guardar_perfil(chat_id, hora=None, minuto=None, signo=None):
-    """Actualiza o inserta datos de un usuario en SQLite sin borrar los datos existentes."""
     perfil_actual = obtener_perfil(chat_id)
     nueva_hora = hora if hora is not None else perfil_actual.get("hora")
     nuevo_minuto = minuto if minuto is not None else perfil_actual.get("minuto")
@@ -124,8 +125,8 @@ def guardar_perfil(chat_id, hora=None, minuto=None, signo=None):
     ''', (str(chat_id), nueva_hora, nuevo_minuto, nuevo_signo))
     conn.commit()
     conn.close()
-# -------------------------------------
 
+# --- LÓGICA DE CARTAS E IMÁGENES ---
 def procesar_imagen_invertida(ruta_imagen):
     with Image.open(ruta_imagen) as imagen_original:
         imagen_girada = imagen_original.rotate(180)
@@ -158,32 +159,150 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    usuario = update.effective_user.first_name
-    mensaje = (
-        f"¡Hola, {usuario}! 🔮 Bienvenido a <b>Mozárabe Tarot</b>.\n\n"
-        "Puedes pedir cartas, programar tu lectura diaria (Ej: <code>/programar 08:30</code>) "
-        "o configurar tu signo zodiacal para recibir sinergias personalizadas.\n\n"
-        "¿Qué deseas consultar hoy?"
-    )
+async def ejecutar_tirada_dia(chat_id, context):
+    perfil = obtener_perfil(chat_id)
+    signo_usuario = perfil.get("signo")
     
+    texto_final, ruta_imagen, carta_id, esta_invertida = generar_datos_carta_aleatoria(signo_usuario)
+    texto_dia = f"🌟 <b>TU CARTA DEL DÍA</b> 🌟\n\n{texto_final}"
+    
+    try:
+        if len(texto_dia) > 1000:
+            caption_corta = "🌟 <b>TU CARTA DEL DÍA</b> 🌟"
+            if esta_invertida:
+                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+            else:
+                with open(ruta_imagen, 'rb') as foto:
+                    await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+            await context.bot.send_message(chat_id=chat_id, text=texto_dia, parse_mode="HTML")
+        else:
+            if esta_invertida:
+                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML")
+            else:
+                with open(ruta_imagen, 'rb') as foto:
+                    await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML")
+    except FileNotFoundError:
+        await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML")
+
+async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
+    perfil = obtener_perfil(chat_id)
+    signo_usuario = perfil.get("signo")
+    
+    try:
+        claves_cartas = list(tarot_db.keys())
+        cartas_seleccionadas = random.sample(claves_cartas, 3)
+        posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
+        
+        for i in range(3):
+            clave = cartas_seleccionadas[i]
+            datos_carta = tarot_db[clave]
+            posicion = posiciones[i]
+            nombre_real = datos_carta['nombre']
+            esta_invertida = random.choice([True, False])
+            
+            if esta_invertida:
+                significado = datos_carta['significado_invertido']
+                titulo_carta = f"{nombre_real} (Invertida 🙃)"
+            else:
+                significado = datos_carta['significado_derecho']
+                titulo_carta = f"{nombre_real} (Al derecho ⭐)"
+            
+            texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
+            
+            if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
+                astro = DATOS_ASTROLOGICOS[signo_usuario]
+                texto_lectura += f"\n\n✨ <i>Sinergia ({astro['nombre']}): Tu energía de {astro['elemento']} influye en esta posición.</i>"
+            
+            ruta_imagen = f"imagenes/{clave}.jpg" 
+            
+            try:
+                if len(texto_lectura) > 1000:
+                    caption_corta = f"📌 <b>{posicion}: {titulo_carta}</b>"
+                    if esta_invertida:
+                        memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                        await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+                    else:
+                        with open(ruta_imagen, 'rb') as foto:
+                            await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+                    
+                    await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML")
+                else:
+                    if esta_invertida:
+                        memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                        await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML")
+                    else:
+                        with open(ruta_imagen, 'rb') as foto:
+                            await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML")
+            except Exception as e:
+                print(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML")
+                except Exception as inner_e:
+                    print(f"⚠️ Error fatal enviando carta {i+1}: {inner_e}")
+            
+            await asyncio.sleep(2.5)
+            
+    finally:
+        if mensaje_espera:
+            try:
+                await mensaje_espera.delete()
+            except BadRequest:
+                pass
+
+async def enviar_menu_ajustes(chat_id, context, usuario):
+    mensaje = (
+        f"¡Hola, {usuario}! 🔮 Bienvenido a los Ajustes de <b>Mozárabe Tarot</b>.\n\n"
+        "Desde aquí puedes programar tu lectura diaria (Ej: <code>/programar 08:30</code>) "
+        "o configurar tu signo zodiacal para recibir sinergias personalizadas."
+    )
     ruta_bienvenida = "imagenes/5L5ZT.jpg"
     
     try:
         with open(ruta_bienvenida, 'rb') as foto:
-            await update.message.reply_photo(
-                photo=foto,
+            await context.bot.send_photo(
+                chat_id=chat_id, 
+                photo=foto, 
                 caption=mensaje, 
                 reply_markup=obtener_menu_principal(), 
                 parse_mode="HTML"
             )
     except FileNotFoundError:
-        print(f"⚠️ Imagen de bienvenida no encontrada en {ruta_bienvenida}")
-        await update.message.reply_text(
+        await context.bot.send_message(
+            chat_id=chat_id, 
             text=mensaje, 
             reply_markup=obtener_menu_principal(), 
             parse_mode="HTML"
         )
+
+# --- HANDLERS PRINCIPALES ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Enviar un mensaje rápido solo para desplegar el teclado persistente en la pantalla
+    await update.message.reply_text(
+        "🃏 Preparando tu mesa de Tarot...", 
+        reply_markup=obtener_teclado_persistente()
+    )
+    
+    # Enviar la foto y el menú de ajustes
+    chat_id = update.effective_chat.id
+    usuario = update.effective_user.first_name
+    await enviar_menu_ajustes(chat_id, context, usuario)
+
+async def manejar_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    texto = update.message.text
+    chat_id = update.effective_chat.id
+    
+    if texto == "🃏 Tirada del Día":
+        await ejecutar_tirada_dia(chat_id, context)
+        
+    elif texto == "🎲 3 Cartas":
+        mensaje_espera = await update.message.reply_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
+        await ejecutar_tres_cartas(chat_id, context, mensaje_espera)
+        
+    elif texto == "⚙️ Menú de Ajustes":
+        usuario = update.effective_user.first_name
+        await enviar_menu_ajustes(chat_id, context, usuario)
 
 async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
@@ -240,12 +359,10 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         zona_horaria = ZoneInfo("America/Mexico_City") 
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         
-        # Guardar en base de datos SQLite
         guardar_perfil(chat_id, hora=hora, minuto=minuto)
         
         await update.effective_message.reply_text(
             f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
-            reply_markup=obtener_menu_principal(),
             parse_mode="HTML"
         )
         
@@ -284,7 +401,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         signo_elegido = query.data.split('_')[2] 
         astro = DATOS_ASTROLOGICOS[signo_elegido]
         
-        # Guardar signo en base de datos SQLite
         guardar_perfil(chat_id, signo=signo_elegido)
         
         mensaje_exito = f"🌟 ¡Excelente! He guardado tu signo como <b>{astro['nombre']}</b>.\n\nA partir de ahora, tus tiradas incluirán una sinergia basada en tu energía de {astro['elemento']}."
@@ -294,144 +410,13 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except BadRequest:
             pass
 
-    elif query.data == "menu_tres_cartas":
-        perfil = obtener_perfil(chat_id)
-        signo_usuario = perfil.get("signo")
-        
-        if query.message.photo:
-            try:
-                await query.message.delete()
-            except BadRequest:
-                pass
-            mensaje_espera = await context.bot.send_message(chat_id=chat_id, text="🔮 Mezclando el mazo y sacando tus 3 cartas...")
-        else:
-            mensaje_espera = await query.edit_message_text(text="🔮 Mezclando el mazo y sacando tus 3 cartas...")
-        
-        try:
-            claves_cartas = list(tarot_db.keys())
-            cartas_seleccionadas = random.sample(claves_cartas, 3)
-            posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
-            
-            for i in range(3):
-                clave = cartas_seleccionadas[i]
-                datos_carta = tarot_db[clave]
-                posicion = posiciones[i]
-                nombre_real = datos_carta['nombre']
-                esta_invertida = random.choice([True, False])
-                
-                if esta_invertida:
-                    significado = datos_carta['significado_invertido']
-                    titulo_carta = f"{nombre_real} (Invertida 🙃)"
-                else:
-                    significado = datos_carta['significado_derecho']
-                    titulo_carta = f"{nombre_real} (Al derecho ⭐)"
-                
-                texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
-                
-                if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
-                    astro = DATOS_ASTROLOGICOS[signo_usuario]
-                    texto_lectura += f"\n\n✨ <i>Sinergia ({astro['nombre']}): Tu energía de {astro['elemento']} influye en esta posición.</i>"
-                
-                ruta_imagen = f"imagenes/{clave}.jpg" 
-                teclado = obtener_menu_principal() if i == 2 else None
-                
-                try:
-                    if len(texto_lectura) > 1000:
-                        caption_corta = f"📌 <b>{posicion}: {titulo_carta}</b>"
-                        if esta_invertida:
-                            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
-                        else:
-                            with open(ruta_imagen, 'rb') as foto:
-                                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
-                        
-                        await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-                    else:
-                        if esta_invertida:
-                            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-                        else:
-                            with open(ruta_imagen, 'rb') as foto:
-                                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-                except Exception as e:
-                    print(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
-                    try:
-                        await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-                    except Exception as inner_e:
-                        print(f"⚠️ Error fatal enviando carta {i+1}: {inner_e}")
-                
-                await asyncio.sleep(2.5)
-                
-        finally:
-            try:
-                await mensaje_espera.delete()
-            except BadRequest:
-                pass
-
     elif query.data == 'volver_inicio':
+        try:
+            await query.message.delete()
+        except BadRequest:
+            pass
         usuario = update.effective_user.first_name
-        mensaje = (
-            f"¡Hola, {usuario}! 🔮 Bienvenido a <b>Mozárabe Tarot</b>.\n\n"
-            "Puedes pedir cartas, programar tu lectura diaria (Ej: <code>/programar 08:30</code>) "
-            "o configurar tu signo zodiacal para recibir sinergias personalizadas.\n\n"
-            "¿Qué deseas consultar hoy?"
-        )
-        ruta_bienvenida = "imagenes/5L5ZT.jpg"
-        
-        try:
-            await query.message.delete()
-        except BadRequest:
-            pass
-            
-        try:
-            with open(ruta_bienvenida, 'rb') as foto:
-                await context.bot.send_photo(
-                    chat_id=chat_id, 
-                    photo=foto, 
-                    caption=mensaje, 
-                    reply_markup=obtener_menu_principal(), 
-                    parse_mode="HTML"
-                )
-        except FileNotFoundError:
-            print(f"⚠️ Imagen de bienvenida no encontrada en {ruta_bienvenida}")
-            await context.bot.send_message(
-                chat_id=chat_id, 
-                text=mensaje, 
-                reply_markup=obtener_menu_principal(), 
-                parse_mode="HTML"
-            )
-
-    elif query.data == 'tirada_dia':
-        perfil = obtener_perfil(chat_id)
-        signo_usuario = perfil.get("signo")
-        
-        try:
-            await query.message.delete()
-        except BadRequest:
-            pass
-            
-        texto_final, ruta_imagen, carta_id, esta_invertida = generar_datos_carta_aleatoria(signo_usuario)
-        texto_dia = f"🌟 <b>TU CARTA DEL DÍA</b> 🌟\n\n{texto_final}"
-        
-        try:
-            if len(texto_dia) > 1000:
-                caption_corta = "🌟 <b>TU CARTA DEL DÍA</b> 🌟"
-                if esta_invertida:
-                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
-                else:
-                    with open(ruta_imagen, 'rb') as foto:
-                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
-                await context.bot.send_message(chat_id=chat_id, text=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
-            else:
-                if esta_invertida:
-                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
-                else:
-                    with open(ruta_imagen, 'rb') as foto:
-                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
-        except FileNotFoundError:
-            await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML", reply_markup=obtener_menu_principal())
+        await enviar_menu_ajustes(chat_id, context, usuario)
 
 def restaurar_alarmas(app: Application):
     perfiles = obtener_todos_perfiles()
@@ -464,7 +449,6 @@ def main():
     if not TOKEN:
         raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe en Railway.")
         
-    # Iniciar Base de Datos SQLite
     init_db()
         
     app = Application.builder().token(TOKEN).build()
@@ -472,6 +456,9 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
+    
+    # --- NUEVO: ESCUCHADOR DE MENSAJES DEL TECLADO PERSISTENTE ---
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, manejar_texto))
     
     restaurar_alarmas(app)
     
