@@ -19,10 +19,11 @@ Interpretaciones personales y textos extraídos de las obras:
 - **Programación diaria automática** Mediante comando: `/programar HH:MM`
 - Soporte para cartas **invertidas** Imágenes rotadas y su significado
 - Interfaz con botones interactivos, diseñado para interfaz móvil y de escritorio en Telegram
+- Horóscopo del día
 
-## 📁 Estructura del Proyecto
+## 📁 Estructura del proyecto
 
-## 🚀 Tecnología para ejecución local
+## 🚀 Tecnologías para ejecución local
 
 ```bash
 # Instalar librería de Python
@@ -38,9 +39,9 @@ source venv/bin/activate
 ./venv/bin/python bot.py
 ```
 
-## 📋 **Variables de Entorno Requeridas**
+## 📋 **Variable de entorno requerida**
 
-TELEGRAM_TOKEN → Token proporcionado por @BotFather
+TELEGRAM_TOKEN → Token proporcionado por @BotFather (local o pública)
 
 ## 🛠 **Tecnologías para ejecución pública**
 
@@ -49,9 +50,9 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 - requests>=2.31.0
 - deep-translator>=1.11.4
 - beautifulsoup4>=4.12.0
-- WEBHOOK_URL y SQLlite recomendado
+- SQLlite recomendado
 
-🧙‍♂️ E-mail: jfk4dk10r@mozmail.com 📬
+🧙‍♂️ Contacto vía e-mail: jfk4dk10r@mozmail.com 📬
 
 👾 Este bot fue diseñado únicamente para fines de entretenimiento y no busca sustituir a ningún ser humano. La interpretación que se ha colocado es meramente personal y subjetiva, con citas de diversos autores a las que se pueden relacionar a cada carta. Para lecturas personalizadas, se recomienda acudir con tarotistas profesionales.
 
