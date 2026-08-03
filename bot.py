@@ -40,6 +40,38 @@ DATOS_ASTROLOGICOS = {
     "piscis": {"nombre": "♓ Piscis", "elemento": "Agua 💧", "enfoque": "la empatía, la fantasía y la espiritualidad"}
 }
 
+# --- DICCIONARIO DE COMPATIBILIDAD DE ELEMENTOS ---
+SINOSTRIA_ELEMENTOS = {
+    "Agua 💧_Agua 💧": "Fusión emocional profunda. Gran empatía y comprensión sin palabras, pero deben evitar ahogarse en el dramatismo o el exceso de sensibilidad.",
+    "Agua 💧_Aire 💨": "Razón vs. Emoción. El Aire racionaliza lo que el Agua siente. Pueden complementarse si el Aire aprende a validar las emociones y el Agua respeta el espacio mental del Aire.",
+    "Agua 💧_Fuego 🔥": "Vapor y ebullición. El Fuego calienta las emociones del Agua, trayendo pasión. Sin embargo, el exceso de Fuego puede evaporar la sensibilidad, o el Agua apagar el entusiasmo.",
+    "Agua 💧_Tierra 🌍": "Nutrición mutua. El Agua fertiliza la Tierra para que dé frutos, y la Tierra le da un cauce seguro al Agua. Una relación sumamente protectora y duradera.",
+    "Aire 💨_Aire 💨": "Conexión mental estimulante. Excelentes conversaciones, libertad e ideas compartidas. El reto es bajar a la tierra y no quedarse solo en el plano de las ideas o la amistad.",
+    "Aire 💨_Fuego 🔥": "El Aire aviva el Fuego. Relación llena de aventuras, pasión y dinamismo. Se inspiran mutuamente para actuar y explorar, logrando una excelente química.",
+    "Aire 💨_Tierra 🌍": "Lo práctico y lo intelectual. El Aire aporta visiones amplias y la Tierra se encarga de estructurarlas. Deben ser pacientes, pues marchan a ritmos y enfoques muy distintos.",
+    "Fuego 🔥_Fuego 🔥": "Pasión explosiva y acción constante. Mucha vitalidad, entusiasmo y franqueza. Deben cuidar de no chocar sus egos o entrar en competencias desgastantes.",
+    "Fuego 🔥_Tierra 🌍": "Impulso y estructura. El Fuego tiene la iniciativa y la Tierra la materializa. Si logran mediar entre la impulsividad del Fuego y la cautela de la Tierra, serán invencibles.",
+    "Tierra 🌍_Tierra 🌍": "Estabilidad, lealtad y compromiso absoluto. Buscan construir a largo plazo con bases muy sólidas. El único reto es evitar que la relación caiga en la rutina o el aburrimiento."
+}
+
+# --- MENÚ PARA ELEGIR PAREJA ---
+def obtener_menu_pareja():
+    keyboard = [
+        [InlineKeyboardButton("♈ Aries", callback_data='pareja_aries'),
+         InlineKeyboardButton("♉ Tauro", callback_data='pareja_tauro'),
+         InlineKeyboardButton("♊ Géminis", callback_data='pareja_geminis')],
+        [InlineKeyboardButton("♋ Cáncer", callback_data='pareja_cancer'),
+         InlineKeyboardButton("♌ Leo", callback_data='pareja_leo'),
+         InlineKeyboardButton("♍ Virgo", callback_data='pareja_virgo')],
+        [InlineKeyboardButton("♎ Libra", callback_data='pareja_libra'),
+         InlineKeyboardButton("♏ Escorpio", callback_data='pareja_escorpio'),
+         InlineKeyboardButton("♐ Sagitario", callback_data='pareja_sagitario')],
+        [InlineKeyboardButton("♑ Capricornio", callback_data='pareja_capricornio'),
+         InlineKeyboardButton("♒ Acuario", callback_data='pareja_acuario'),
+         InlineKeyboardButton("♓ Piscis", callback_data='pareja_piscis')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
 # --- MENÚS ---
 def obtener_menu_principal():
     keyboard = [
@@ -69,6 +101,7 @@ def obtener_menu_signos():
 def obtener_teclado_persistente():
     keyboard = [
         [KeyboardButton("🃏 Tirada del Día"), KeyboardButton("🎲 3 Cartas")],
+        [KeyboardButton("❤️ Compatibilidad")],
         [KeyboardButton("⚙️ Menú de Ajustes")]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
@@ -342,6 +375,20 @@ async def manejar_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
         mensaje_espera = await update.message.reply_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         await ejecutar_tres_cartas(chat_id, context, mensaje_espera)
         
+    elif texto == "❤️ Compatibilidad":
+        perfil = obtener_perfil(chat_id)
+        if not perfil.get("signo"):
+            await update.message.reply_text(
+                "⚠️ Para leer tu compatibilidad, primero necesito conocer tu propia energía. Configura tu signo aquí:",
+                reply_markup=obtener_menu_signos()
+            )
+        else:
+            await update.message.reply_text(
+                "💞 <b>Tirada de Compatibilidad</b>\n\n¿Cuál es el signo de tu persona especial?",
+                parse_mode="HTML",
+                reply_markup=obtener_menu_pareja()
+            )
+            
     elif texto == "⚙️ Menú de Ajustes":
         usuario = update.effective_user.first_name
         await enviar_menu_ajustes(chat_id, context, usuario)
@@ -473,6 +520,72 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
         usuario = update.effective_user.first_name
         await enviar_menu_ajustes(chat_id, context, usuario)
+    elif query.data.startswith('pareja_'):
+        signo_pareja = query.data.split('_')[1]
+        perfil = obtener_perfil(chat_id)
+        signo_usuario = perfil.get("signo")
+        
+        astro_user = DATOS_ASTROLOGICOS[signo_usuario]
+        astro_pareja = DATOS_ASTROLOGICOS[signo_pareja]
+        
+        # Ordenamos los elementos alfabéticamente para buscar la combinación exacta en el diccionario
+        elementos = sorted([astro_user['elemento'], astro_pareja['elemento']])
+        llave_sinergia = f"{elementos[0]}_{elementos[1]}"
+        texto_sinergia = SINOSTRIA_ELEMENTOS.get(llave_sinergia, "Sinergia en proceso...")
+        
+        # Generar la carta del vínculo
+        claves_cartas = list(tarot_db.keys())
+        carta_id = random.choice(claves_cartas)
+        carta = tarot_db[carta_id]
+        esta_invertida = random.choice([True, False])
+        
+        nombre = carta["nombre"]
+        titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)" if esta_invertida else f"🃏 <b>{nombre}</b> (Al Derecho ⭐)"
+        interpretacion = carta["significado_invertido"] if esta_invertida else carta["significado_derecho"]
+        
+        mensaje_final = (
+            f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} & {astro_pareja['nombre']})</b> 💞\n\n"
+            f"{titulo}\n\n"
+            f"<b>Interpretación:</b>\n{interpretacion}\n\n"
+            f"✨ <b>Sinergia de Elementos ({astro_user['elemento']} + {astro_pareja['elemento']}):</b>\n"
+            f"{texto_sinergia}"
+        )
+        
+        ruta_imagen = f"imagenes/{carta_id}.jpg"
+        
+        try:
+            await query.message.delete()
+        except BadRequest:
+            pass
+            
+        mensaje_espera = await context.bot.send_message(chat_id=chat_id, text="🔮 Cruzando energías y sacando la carta del vínculo...")
+        await asyncio.sleep(2)
+        
+        try:
+            if len(mensaje_final) > 1000:
+                caption_corta = f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} & {astro_pareja['nombre']})</b>"
+                if esta_invertida:
+                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+                else:
+                    with open(ruta_imagen, 'rb') as foto:
+                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+                await context.bot.send_message(chat_id=chat_id, text=mensaje_final, parse_mode="HTML")
+            else:
+                if esta_invertida:
+                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=mensaje_final, parse_mode="HTML")
+                else:
+                    with open(ruta_imagen, 'rb') as foto:
+                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=mensaje_final, parse_mode="HTML")
+        except Exception as e:
+            logging.error(f"⚠️ Error enviando carta de compatibilidad: {e}")
+            await context.bot.send_message(chat_id=chat_id, text=mensaje_final, parse_mode="HTML")
+        
+        try:
+            await mensaje_espera.delete()
+        except BadRequest:
+            pass
 
 def restaurar_alarmas(app: Application):
     perfiles = obtener_todos_perfiles()
