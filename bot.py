@@ -427,7 +427,7 @@ def main():
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
     
     if not TOKEN:
-        raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe en Railway.")
+        raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe.")
         
     app = Application.builder().token(TOKEN).build()
     
@@ -437,8 +437,20 @@ def main():
     
     restaurar_alarmas(app)
     
-    print("🔮 El bot de Mozárabe Tarot en la nube está en marcha...")
-    app.run_polling()
+    # --- NUEVO: CONFIGURACIÓN HÍBRIDA (WEBHOOK / POLLING) ---
+    PORT = int(os.environ.get('PORT', '8443'))
+    WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
+    
+    if WEBHOOK_URL:
+        print(f"🔮 Iniciando en modo WEBHOOK en el puerto {PORT}...")
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            webhook_url=WEBHOOK_URL
+        )
+    else:
+        print("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
+        app.run_polling()
 
 if __name__ == '__main__':
     main()
