@@ -227,11 +227,15 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         with open(ruta_imagen, 'rb') as foto:
                             await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
                 except Exception as e:
-                    print(f"Error procesando la imagen {ruta_imagen}: {e}")
-                    await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                    print(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
+                    # Protección extra para asegurar que el ciclo no se rompa
+                    try:
+                        await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                    except Exception as inner_e:
+                        print(f"⚠️ Error fatal enviando carta {i+1}: {inner_e}")
                 
-                # Pausa técnica y dramática entre cartas
-                await asyncio.sleep(1.5)
+                # Pausa aumentada para evitar los límites de la API de Telegram
+                await asyncio.sleep(2.5)
                 
         finally:
             try:
