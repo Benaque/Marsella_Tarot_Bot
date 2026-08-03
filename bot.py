@@ -9,7 +9,6 @@ from datetime import time
 import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-import io
 from PIL import Image
 
 # Configuración de registros
@@ -33,32 +32,19 @@ def obtener_menu_principal():
 ARCHIVO_ALARMAS = 'alarmas_db.json'
 
 def cargar_alarmas():
-    # 1. Comprobamos si el archivo existe
     if os.path.exists(ARCHIVO_ALARMAS):
-        # 2. Comprobamos que el archivo no esté vacío (0 bytes)
         if os.path.getsize(ARCHIVO_ALARMAS) > 0:
             with open(ARCHIVO_ALARMAS, 'r', encoding='utf-8') as f:
                 try:
                     return json.load(f)
                 except json.JSONDecodeError:
-                    # 3. Si el archivo tiene texto pero no es un JSON válido, lo ignoramos
                     print("⚠️ Advertencia: El archivo alarmas_db.json estaba corrupto o vacío. Se iniciará desde cero.")
                     return {}
-    
-    # Si no existe o estaba vacío, devolvemos un diccionario limpio
     return {}
 
 def guardar_alarmas(alarmas):
-    # Guardamos el diccionario de alarmas en el archivo JSON
     with open(ARCHIVO_ALARMAS, 'w', encoding='utf-8') as f:
         json.dump(alarmas, f, indent=4)
-
-# Función auxiliar para generar textos e información de cartas
-def generar_datos_carta_aleatoria():
-    claves_cartas = list(tarot_db.keys())
-    carta_id = random.choice(claves_cartas)
-    carta = tarot_db[carta_id]
-    esta_invertida = random.choice([True, False])
 
 def procesar_imagen_invertida(ruta_imagen):
     """Gira la imagen 180 grados en un hilo separado para no bloquear el bot."""
@@ -69,6 +55,13 @@ def procesar_imagen_invertida(ruta_imagen):
         imagen_girada.save(memoria, 'JPEG')
         memoria.seek(0)
         return memoria 
+
+# Función auxiliar para generar textos e información de cartas
+def generar_datos_carta_aleatoria():
+    claves_cartas = list(tarot_db.keys())
+    carta_id = random.choice(claves_cartas)
+    carta = tarot_db[carta_id]
+    esta_invertida = random.choice([True, False])
 
     nombre = carta["nombre"]
     if esta_invertida:
@@ -154,12 +147,6 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML"
         )
         
-        await update.effective_message.reply_text(
-            f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
-            reply_markup=obtener_menu_principal(),
-            parse_mode="HTML"
-        )
-        
     except (IndexError, ValueError):
         await update.effective_message.reply_text(
             "❌ Formato incorrecto. Por favor usa el comando de esta forma:\n"
@@ -180,12 +167,10 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "👉 <b>Ejemplo:</b> <code>/programar 08:30</code>"
         )
         
-        # En lugar de intentar editar un mensaje que podría tener una foto, 
-        # borramos el mensaje actual y enviamos uno nuevo limpio.
         try:
             await query.message.delete()
         except Exception:
-            pass # Si no se puede borrar (por antigüedad u otro error), lo ignoramos
+            pass
             
         await context.bot.send_message(
             chat_id=chat_id,
@@ -214,7 +199,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cartas_seleccionadas = random.sample(claves_cartas, 3)
         posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
         
-        # Enviar cada carta con su interpretación como pie de foto
         for i in range(3):
             clave = cartas_seleccionadas[i]
             datos_carta = tarot_db[clave]
@@ -232,13 +216,12 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ruta_imagen = f"imagenes/{clave}.jpg" 
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
             
-            # Solo la última carta llevará el menú principal para no inundar el chat de botones
             teclado = obtener_menu_principal() if i == 2 else None
             
             try:
                 if esta_invertida:
-            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
+                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
                 else:
                     with open(ruta_imagen, 'rb') as foto:
                         await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
@@ -281,8 +264,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         try:
             if esta_invertida:
-            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
+                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
             else:
                 with open(ruta_imagen, 'rb') as foto:
                     await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
@@ -301,7 +284,6 @@ def restaurar_alarmas(app: Application):
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         nombre_tarea = str(chat_id)
         
-        # Volvemos a encolar el trabajo
         app.job_queue.run_daily(
             enviar_carta_automatica,
             time=hora_programada,
@@ -324,9 +306,7 @@ def main():
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
     
-    # --- NUEVO CÓDIGO: RESTAURAR ALARMAS ---
     restaurar_alarmas(app)
-    # ---------------------------------------
     
     print("🔮 El bot de Mozárabe Tarot en la nube está en marcha...")
     app.run_polling()
