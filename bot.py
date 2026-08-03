@@ -5,6 +5,7 @@ import os
 import io
 import asyncio
 import sqlite3
+import requests
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
@@ -70,6 +71,58 @@ def obtener_teclado_persistente():
         [KeyboardButton("⚙️ Menú de Ajustes")]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
+
+# --- NUEVA FUNCIÓN PARA LA AZTRO API ---
+def obtener_horoscopo_aztro(signo):
+    """Consulta la Aztro API de forma gratuita para obtener el horóscopo del día."""
+    url = f"https://aztro.sameerkumar.website/?sign={signo}&day=today"
+    try:
+        # Aztro requiere una petición POST
+        respuesta = requests.post(url, timeout=5)
+        if respuesta.status_code == 200:
+            datos = respuesta.json()
+            descripcion = datos.get('description', '')
+            mood = datos.get('mood', '')
+            color = datos.get('color', '')
+            
+            texto_astro = f"🔮 <b>Horóscopo del Día:</b> {descripcion}\n"
+            if mood and color:
+                texto_astro += f"🎨 <i>Ánimo:</i> {mood} | <i>Color:</i> {color}"
+            return texto_astro
+    except Exception as e:
+        logging.error(f"⚠️ Error al conectar con Aztro API: {e}")
+    
+    return None
+
+# --- MODIFICACIÓN EN LA LÓGICA DE CARTAS ---
+def generar_datos_carta_aleatoria(signo_usuario=None):
+    claves_cartas = list(tarot_db.keys())
+    carta_id = random.choice(claves_cartas)
+    carta = tarot_db[carta_id]
+    esta_invertida = random.choice([True, False])
+
+    nombre = carta["nombre"]
+    if esta_invertida:
+        titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)"
+        interpretacion = carta["significado_invertido"]
+    else:
+        titulo = f"🃏 <b>{nombre}</b> (Al Derecho ⭐)"
+        interpretacion = carta["significado_derecho"]
+        
+    texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
+    
+    # Integración de la Sinergia Astrológica + Aztro API
+    if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
+        astro = DATOS_ASTROLOGICOS[signo_usuario]
+        texto_final += f"\n\n✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
+        
+        # Llamamos a la API gratuita de Aztro usando el nombre del signo en minúsculas
+        horoscopo_api = obtener_horoscopo_aztro(signo_usuario.lower())
+        if horoscopo_api:
+            texto_final += f"\n\n{horoscopo_api}"
+        
+    ruta_imagen = f"imagenes/{carta_id}.jpg"
+    return texto_final, ruta_imagen, carta_id, esta_invertida
 
 # --- BASE DE DATOS SQLITE ---
 os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedirs('data', exist_ok=True)
