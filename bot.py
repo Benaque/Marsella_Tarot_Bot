@@ -27,6 +27,21 @@ def obtener_menu_principal():
     ]
     return InlineKeyboardMarkup(keyboard)
 
+# Cargar alarmas en base de datos
+ARCHIVO_ALARMAS = 'alarmas_db.json'
+
+def cargar_alarmas():
+    # Si el archivo existe, lo leemos. Si no, devolvemos un diccionario vacío.
+    if os.path.exists(ARCHIVO_ALARMAS):
+        with open(ARCHIVO_ALARMAS, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def guardar_alarmas(alarmas):
+    # Guardamos el diccionario de alarmas en el archivo JSON
+    with open(ARCHIVO_ALARMAS, 'w', encoding='utf-8') as f:
+        json.dump(alarmas, f, indent=4)
+
 # Función auxiliar para generar textos e información de cartas
 def generar_datos_carta_aleatoria():
     claves_cartas = list(tarot_db.keys())
@@ -111,11 +126,16 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         zona_horaria = ZoneInfo("America/Mexico_City") 
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         
-        context.job_queue.run_daily(
-            enviar_carta_automatica,
-            time=hora_programada,
-            chat_id=chat_id,
-            name=nombre_tarea
+        # --- NUEVO CÓDIGO: GUARDAR EN JSON ---
+        alarmas = cargar_alarmas()
+        alarmas[str(chat_id)] = {"hora": hora, "minuto": minuto}
+        guardar_alarmas(alarmas)
+        # -------------------------------------
+        
+        await update.effective_message.reply_text(
+            f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
+            reply_markup=obtener_menu_principal(),
+            parse_mode="HTML"
         )
         
         await update.effective_message.reply_text(
@@ -263,6 +283,29 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except FileNotFoundError:
             await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML", reply_markup=obtener_menu_principal())
 
+def restaurar_alarmas(app: Application):
+    alarmas = cargar_alarmas()
+    zona_horaria = ZoneInfo("America/Mexico_City")
+    
+    for chat_id_str, datos in alarmas.items():
+        chat_id = int(chat_id_str)
+        hora = datos["hora"]
+        minuto = datos["minuto"]
+        
+        hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
+        nombre_tarea = str(chat_id)
+        
+        # Volvemos a encolar el trabajo
+        app.job_queue.run_daily(
+            enviar_carta_automatica,
+            time=hora_programada,
+            chat_id=chat_id,
+            name=nombre_tarea
+        )
+        
+    if alarmas:
+        print(f"🔮 Se han restaurado {len(alarmas)} alarmas programadas en memoria.")
+
 def main():
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
     
@@ -274,6 +317,10 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
+    
+    # --- NUEVO CÓDIGO: RESTAURAR ALARMAS ---
+    restaurar_alarmas(app)
+    # ---------------------------------------
     
     print("🔮 El bot de Mozárabe Tarot en la nube está en marcha...")
     app.run_polling()
