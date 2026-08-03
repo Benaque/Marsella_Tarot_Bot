@@ -51,3 +51,5 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 🧙‍♂️ E-mail: jfk4dk10r@mozmail.com 📬
 
 👾 Este bot fue diseñado únicamente para fines de entretenimiento y no busca sustituir a ningún ser humano. La interpretación que se ha colocado es meramente personal y subjetiva, con citas de diversos autores a las que se pueden relacionar a cada carta. Para lecturas personalizadas, se recomienda acudir con tarotistas profesionales.
+
+Proyecto OpenSource: https://creativecommons.org/licenses/by/4.0/ 
