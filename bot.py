@@ -474,7 +474,7 @@ def main():
         )
     else:
         print("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
-        app.run_polling()
+        app.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
     main()

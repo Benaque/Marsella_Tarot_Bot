@@ -1,2 +1,2 @@
-python-telegram-bot[job-queue,webhooks]
+python-telegram-bot[job-queue,webhooks]>=20.0
 Pillow>=10.0.0
