@@ -31,10 +31,19 @@ def obtener_menu_principal():
 ARCHIVO_ALARMAS = 'alarmas_db.json'
 
 def cargar_alarmas():
-    # Si el archivo existe, lo leemos. Si no, devolvemos un diccionario vacío.
+    # 1. Comprobamos si el archivo existe
     if os.path.exists(ARCHIVO_ALARMAS):
-        with open(ARCHIVO_ALARMAS, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        # 2. Comprobamos que el archivo no esté vacío (0 bytes)
+        if os.path.getsize(ARCHIVO_ALARMAS) > 0:
+            with open(ARCHIVO_ALARMAS, 'r', encoding='utf-8') as f:
+                try:
+                    return json.load(f)
+                except json.JSONDecodeError:
+                    # 3. Si el archivo tiene texto pero no es un JSON válido, lo ignoramos
+                    print("⚠️ Advertencia: El archivo alarmas_db.json estaba corrupto o vacío. Se iniciará desde cero.")
+                    return {}
+    
+    # Si no existe o estaba vacío, devolvemos un diccionario limpio
     return {}
 
 def guardar_alarmas(alarmas):
