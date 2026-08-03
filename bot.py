@@ -332,7 +332,10 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = update.effective_user.first_name
     
     if context.job_queue is None:
-        await update.effective_message.reply_text("❌ Error interno: JobQueue no está activo.")
+        await update.effective_message.reply_text(
+            "❌ Error interno: JobQueue no está activo.",
+            reply_markup=obtener_teclado_persistente()
+        )
         return
 
     try:
@@ -361,15 +364,19 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
             name=nombre_tarea
         )
         
+        # 🌟 Añadimos el teclado aquí para que no desaparezca al programar con éxito
         await update.effective_message.reply_text(
             f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=obtener_teclado_persistente()
         )
         
     except (IndexError, ValueError):
+        # 🌟 Añadimos el teclado también en caso de error de formato
         await update.effective_message.reply_text(
             "❌ Formato incorrecto. Por favor usa:\n<code>/programar HH:MM</code> (ej: <code>/programar 07:15</code>)",
-            parse_mode="HTML"
+            parse_mode="HTML",
+            reply_markup=obtener_teclado_persistente()
         )
 
 async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
