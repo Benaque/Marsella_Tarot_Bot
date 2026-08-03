@@ -197,44 +197,47 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="🔮 Mezclando el mazo y sacando tus 3 cartas..."
             )
         
-        claves_cartas = list(tarot_db.keys())
-        cartas_seleccionadas = random.sample(claves_cartas, 3)
-        posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
-        
-        for i in range(3):
-            clave = cartas_seleccionadas[i]
-            datos_carta = tarot_db[clave]
-            posicion = posiciones[i]
-            nombre_real = datos_carta['nombre']
-            esta_invertida = random.choice([True, False])
-            
-            if esta_invertida:
-                significado = datos_carta['significado_invertido']
-                titulo_carta = f"{nombre_real} (Invertida 🙃)"
-            else:
-                significado = datos_carta['significado_derecho']
-                titulo_carta = f"{nombre_real} (Al derecho ⭐)"
-            
-            ruta_imagen = f"imagenes/{clave}.jpg" 
-            texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
-            
-            teclado = obtener_menu_principal() if i == 2 else None
-            
-            try:
-                if esta_invertida:
-                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-                else:
-                    with open(ruta_imagen, 'rb') as foto:
-                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-            except Exception as e:
-                print(f"Error procesando la imagen {ruta_imagen}: {e}")
-                await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
-            
         try:
-            await mensaje_espera.delete()
-        except BadRequest:
-            pass
+            claves_cartas = list(tarot_db.keys())
+            cartas_seleccionadas = random.sample(claves_cartas, 3)
+            posiciones = ["Pasado 🕰️", "Presente 👁️", "Futuro ✨"]
+            
+            for i in range(3):
+                clave = cartas_seleccionadas[i]
+                datos_carta = tarot_db[clave]
+                posicion = posiciones[i]
+                nombre_real = datos_carta['nombre']
+                esta_invertida = random.choice([True, False])
+                
+                if esta_invertida:
+                    significado = datos_carta['significado_invertido']
+                    titulo_carta = f"{nombre_real} (Invertida 🙃)"
+                else:
+                    significado = datos_carta['significado_derecho']
+                    titulo_carta = f"{nombre_real} (Al derecho ⭐)"
+                
+                ruta_imagen = f"imagenes/{clave}.jpg" 
+                texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
+                
+                teclado = obtener_menu_principal() if i == 2 else None
+                
+                try:
+                    if esta_invertida:
+                        memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                        await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                    else:
+                        with open(ruta_imagen, 'rb') as foto:
+                            await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                except Exception as e:
+                    print(f"Error procesando la imagen {ruta_imagen}: {e}")
+                    await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                    
+        finally:
+            # Esto se ejecutará SIEMPRE, incluso si el bucle de arriba falla
+            try:
+                await mensaje_espera.delete()
+            except BadRequest:
+                pass
 
     # --- MENÚ DE INICIO ---
     elif query.data == 'volver_inicio':
