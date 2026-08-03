@@ -21,7 +21,7 @@ logging.basicConfig(
 with open('tarot_db.json', 'r', encoding='utf-8') as f:
     tarot_db = json.load(f)
 
-# --- NUEVO: Base de Datos Astrológica ---
+# Base de Datos Astrológica
 DATOS_ASTROLOGICOS = {
     "aries": {"nombre": "♈ Aries", "elemento": "Fuego 🔥", "enfoque": "la acción, el impulso y la iniciativa"},
     "tauro": {"nombre": "♉ Tauro", "elemento": "Tierra 🌍", "enfoque": "la estabilidad, el confort y la paciencia"},
@@ -64,7 +64,7 @@ def obtener_menu_signos():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# Cargar perfiles de usuarios (antes alarmas)
+# Cargar perfiles de usuarios
 ARCHIVO_PERFILES = 'alarmas_db.json'
 
 def cargar_perfiles():
@@ -107,7 +107,6 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         
     texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
     
-    # --- NUEVO: Sinergia Astrológica ---
     if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
         astro = DATOS_ASTROLOGICOS[signo_usuario]
         texto_final += f"\n\n✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
@@ -140,12 +139,22 @@ async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     texto_automatico = f"🧞‍♀️ <b>¡Tu carta del día automática ha llegado!</b> 🧞‍♂️\n\n{texto_final}"
     
     try:
-        if esta_invertida:
-            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
+        if len(texto_automatico) > 1000:
+            caption_corta = "🧞‍♀️ <b>¡Tu carta del día automática ha llegado!</b> 🧞‍♂️"
+            if esta_invertida:
+                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+            else:
+                with open(ruta_imagen, 'rb') as foto:
+                    await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+            await context.bot.send_message(chat_id=chat_id, text=texto_automatico, parse_mode="HTML")
         else:
-            with open(ruta_imagen, 'rb') as foto:
-                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_automatico, parse_mode="HTML")
+            if esta_invertida:
+                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
+            else:
+                with open(ruta_imagen, 'rb') as foto:
+                    await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_automatico, parse_mode="HTML")
     except FileNotFoundError:
         await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_automatico}", parse_mode="HTML")
 
@@ -174,7 +183,6 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         zona_horaria = ZoneInfo("America/Mexico_City") 
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         
-        # Guardar hora sin borrar el signo si ya existe
         perfiles = cargar_perfiles()
         if str(chat_id) not in perfiles:
             perfiles[str(chat_id)] = {}
@@ -211,7 +219,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
         await context.bot.send_message(chat_id=chat_id, text=mensaje_instrucciones, parse_mode="HTML", reply_markup=obtener_menu_principal())
 
-    # --- NUEVO: MENÚ DE SIGNOS ---
     elif query.data == 'menu_signo':
         mensaje_signo = "✨ <b>Sinergia Astrológica</b> ✨\n\nElige tu signo zodiacal para que el Tarot Mozárabe cruce la energía de tu elemento con el mensaje de tus cartas:"
         try:
@@ -220,7 +227,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
         await context.bot.send_message(chat_id=chat_id, text=mensaje_signo, parse_mode="HTML", reply_markup=obtener_menu_signos())
 
-    # --- NUEVO: GUARDAR SIGNO ---
     elif query.data.startswith('set_signo_'):
         signo_elegido = query.data.split('_')[2] 
         astro = DATOS_ASTROLOGICOS[signo_elegido]
@@ -272,7 +278,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
                 
-                # Agregar sinergia a cada carta si hay signo guardado
                 if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
                     astro = DATOS_ASTROLOGICOS[signo_usuario]
                     texto_lectura += f"\n\n✨ <i>Sinergia ({astro['nombre']}): Tu energía de {astro['elemento']} influye en esta posición.</i>"
@@ -281,12 +286,23 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 teclado = obtener_menu_principal() if i == 2 else None
                 
                 try:
-                    if esta_invertida:
-                        memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                        await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                    if len(texto_lectura) > 1000:
+                        caption_corta = f"📌 <b>{posicion}: {titulo_carta}</b>"
+                        if esta_invertida:
+                            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+                        else:
+                            with open(ruta_imagen, 'rb') as foto:
+                                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+                        
+                        await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML", reply_markup=teclado)
                     else:
-                        with open(ruta_imagen, 'rb') as foto:
-                            await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                        if esta_invertida:
+                            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+                        else:
+                            with open(ruta_imagen, 'rb') as foto:
+                                await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
                 except Exception as e:
                     print(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
                     try:
@@ -332,12 +348,22 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         texto_dia = f"🌟 <b>TU CARTA DEL DÍA</b> 🌟\n\n{texto_final}"
         
         try:
-            if esta_invertida:
-                memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
-                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
+            if len(texto_dia) > 1000:
+                caption_corta = "🌟 <b>TU CARTA DEL DÍA</b> 🌟"
+                if esta_invertida:
+                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
+                else:
+                    with open(ruta_imagen, 'rb') as foto:
+                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=caption_corta, parse_mode="HTML")
+                await context.bot.send_message(chat_id=chat_id, text=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
             else:
-                with open(ruta_imagen, 'rb') as foto:
-                    await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
+                if esta_invertida:
+                    memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
+                else:
+                    with open(ruta_imagen, 'rb') as foto:
+                        await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
         except FileNotFoundError:
             await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML", reply_markup=obtener_menu_principal())
 
