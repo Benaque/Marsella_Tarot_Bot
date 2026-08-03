@@ -100,9 +100,9 @@ def obtener_menu_signos():
 
 def obtener_teclado_persistente():
     keyboard = [
-        [KeyboardButton("🃏 Tirada del Día"), KeyboardButton("🎲 3 Cartas")],
-        [KeyboardButton("❤️ Compatibilidad")],
-        [KeyboardButton("⚙️ Menú de Ajustes")]
+        [KeyboardButton("🃏 Tirada del día"), KeyboardButton("🎲 Tirada de tres cartas")],
+        [KeyboardButton("❤️ Tirada de compatibilidad del día")],
+        [KeyboardButton("⚙️ Ajustes de signo y programación")]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
