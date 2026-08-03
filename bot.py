@@ -368,14 +368,14 @@ async def manejar_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     texto = update.message.text
     chat_id = update.effective_chat.id
     
-    if texto == "🃏 Tirada del Día":
+    if texto == "🃏 Tirada del día":
         await ejecutar_tirada_dia(chat_id, context)
         
-    elif texto == "🎲 3 Cartas":
+    elif texto == "🎲 Tirada de tres cartas":
         mensaje_espera = await update.message.reply_text("🔮 Mezclando el mazo y sacando tus 3 cartas...")
         await ejecutar_tres_cartas(chat_id, context, mensaje_espera)
         
-    elif texto == "❤️ Compatibilidad":
+    elif texto == "❤️ Tirada de compatibilidad del día":
         perfil = obtener_perfil(chat_id)
         if not perfil.get("signo"):
             await update.message.reply_text(
@@ -389,7 +389,7 @@ async def manejar_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=obtener_menu_pareja()
             )
             
-    elif texto == "⚙️ Menú de Ajustes":
+    elif texto == "⚙️ Ajustes de signo y programación":
         usuario = update.effective_user.first_name
         await enviar_menu_ajustes(chat_id, context, usuario)
 
