@@ -76,35 +76,32 @@ os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedi
 DB_NAME = '/app/data/perfiles.db' if os.path.exists('/app') else 'data/perfiles.db'
 
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS perfiles (
-            chat_id TEXT PRIMARY KEY,
-            hora INTEGER,
-            minuto INTEGER,
-            signo TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS perfiles (
+                chat_id TEXT PRIMARY KEY,
+                hora INTEGER,
+                minuto INTEGER,
+                signo TEXT
+            )
+        ''')
+        conn.commit()
 
 def obtener_perfil(chat_id):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('SELECT hora, minuto, signo FROM perfiles WHERE chat_id = ?', (str(chat_id),))
-    fila = cursor.fetchone()
-    conn.close()
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT hora, minuto, signo FROM perfiles WHERE chat_id = ?', (str(chat_id),))
+        fila = cursor.fetchone()
     if fila:
         return {"hora": fila[0], "minuto": fila[1], "signo": fila[2]}
     return {}
 
 def obtener_todos_perfiles():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('SELECT chat_id, hora, minuto, signo FROM perfiles')
-    filas = cursor.fetchall()
-    conn.close()
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT chat_id, hora, minuto, signo FROM perfiles')
+        filas = cursor.fetchall()
     perfiles = {}
     for fila in filas:
         chat_id, hora, minuto, signo = fila
@@ -117,14 +114,13 @@ def guardar_perfil(chat_id, hora=None, minuto=None, signo=None):
     nuevo_minuto = minuto if minuto is not None else perfil_actual.get("minuto")
     nuevo_signo = signo if signo is not None else perfil_actual.get("signo")
     
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT OR REPLACE INTO perfiles (chat_id, hora, minuto, signo)
-        VALUES (?, ?, ?, ?)
-    ''', (str(chat_id), nueva_hora, nuevo_minuto, nuevo_signo))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT OR REPLACE INTO perfiles (chat_id, hora, minuto, signo)
+            VALUES (?, ?, ?, ?)
+        ''', (str(chat_id), nueva_hora, nuevo_minuto, nuevo_signo))
+        conn.commit()
 
 # --- LÓGICA DE CARTAS E IMÁGENES ---
 def procesar_imagen_invertida(ruta_imagen):
@@ -236,11 +232,11 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
                         with open(ruta_imagen, 'rb') as foto:
                             await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML")
             except Exception as e:
-                print(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
+                logging.error(f"⚠️ Error enviando imagen {ruta_imagen}: {e}")
                 try:
                     await context.bot.send_message(chat_id=chat_id, text=texto_lectura, parse_mode="HTML")
                 except Exception as inner_e:
-                    print(f"⚠️ Error fatal enviando carta {i+1}: {inner_e}")
+                    logging.error(f"⚠️ Error fatal enviando carta {i+1}: {inner_e}")
             
             await asyncio.sleep(2.5)
             
@@ -278,13 +274,10 @@ async def enviar_menu_ajustes(chat_id, context, usuario):
 
 # --- HANDLERS PRINCIPALES ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Enviar un mensaje rápido solo para desplegar el teclado persistente en la pantalla
     await update.message.reply_text(
         "🃏 Preparando tu mesa de Tarot...", 
         reply_markup=obtener_teclado_persistente()
     )
-    
-    # Enviar la foto y el menú de ajustes
     chat_id = update.effective_chat.id
     usuario = update.effective_user.first_name
     await enviar_menu_ajustes(chat_id, context, usuario)
@@ -360,6 +353,13 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         
         guardar_perfil(chat_id, hora=hora, minuto=minuto)
+        
+        context.job_queue.run_daily(
+            enviar_carta_automatica,
+            time=hora_programada,
+            chat_id=chat_id,
+            name=nombre_tarea
+        )
         
         await update.effective_message.reply_text(
             f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
@@ -441,7 +441,7 @@ def restaurar_alarmas(app: Application):
             restauradas += 1
         
     if restauradas > 0:
-        print(f"🔮 Se han restaurado {restauradas} alarmas programadas desde SQLite.")
+        logging.info(f"🔮 Se han restaurado {restauradas} alarmas programadas desde SQLite.")
 
 def main():
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
@@ -456,8 +456,6 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("programar", programar_hora))
     app.add_handler(CallbackQueryHandler(manejar_botones))
-    
-    # --- NUEVO: ESCUCHADOR DE MENSAJES DEL TECLADO PERSISTENTE ---
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, manejar_texto))
     
     restaurar_alarmas(app)
@@ -466,19 +464,18 @@ def main():
     WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
     
     if WEBHOOK_URL:
-        print(f"🔮 Iniciando en modo WEBHOOK en el puerto {PORT}...")
+        logging.info(f"🔮 Iniciando en modo WEBHOOK en el puerto {PORT}...")
         url_limpia = WEBHOOK_URL.rstrip('/')
         
-        # Usamos el TOKEN como ruta de seguridad para el Webhook
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
             url_path=TOKEN,
             webhook_url=f"{url_limpia}/{TOKEN}",
-            drop_pending_updates=True  # 🚀 ¡Esta es la línea clave que falta en tu archivo!
+            drop_pending_updates=True
         )
     else:
-        print("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
+        logging.info("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
         app.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
