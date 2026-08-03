@@ -467,10 +467,13 @@ def main():
     
     if WEBHOOK_URL:
         print(f"🔮 Iniciando en modo WEBHOOK en el puerto {PORT}...")
+        # Limpiamos la URL por si accidentalmente pusiste un '/' al final en Railway
+        url_limpia = WEBHOOK_URL.rstrip('/') 
+        
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
-            webhook_url=WEBHOOK_URL
+            webhook_url=url_limpia
         )
     else:
         print("🔮 WEBHOOK_URL no definida. Iniciando en modo POLLING...")
