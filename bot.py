@@ -2,6 +2,8 @@ import json
 import random
 import logging
 import os
+import io
+import asyncio
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
@@ -57,7 +59,17 @@ def generar_datos_carta_aleatoria():
     carta_id = random.choice(claves_cartas)
     carta = tarot_db[carta_id]
     esta_invertida = random.choice([True, False])
-    
+
+def procesar_imagen_invertida(ruta_imagen):
+    """Gira la imagen 180 grados en un hilo separado para no bloquear el bot."""
+    with Image.open(ruta_imagen) as imagen_original:
+        imagen_girada = imagen_original.rotate(180)
+        memoria = io.BytesIO()
+        memoria.name = 'girada.jpg'
+        imagen_girada.save(memoria, 'JPEG')
+        memoria.seek(0)
+        return memoria 
+
     nombre = carta["nombre"]
     if esta_invertida:
         titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)"
@@ -94,13 +106,8 @@ async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     
     try:
         if esta_invertida:
-            with Image.open(ruta_imagen) as imagen_original:
-                imagen_girada = imagen_original.rotate(180)
-                memoria = io.BytesIO()
-                memoria.name = 'girada.jpg'
-                imagen_girada.save(memoria, 'JPEG')
-                memoria.seek(0)
-                await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
+            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
         else:
             with open(ruta_imagen, 'rb') as foto:
                 await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_automatico, parse_mode="HTML")
@@ -230,13 +237,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             try:
                 if esta_invertida:
-                    with Image.open(ruta_imagen) as imagen_original:
-                        imagen_girada = imagen_original.rotate(180)
-                        memoria = io.BytesIO()
-                        memoria.name = 'girada.jpg'
-                        imagen_girada.save(memoria, 'JPEG')
-                        memoria.seek(0)
-                        await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
+            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
                 else:
                     with open(ruta_imagen, 'rb') as foto:
                         await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_lectura, parse_mode="HTML", reply_markup=teclado)
@@ -279,13 +281,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         try:
             if esta_invertida:
-                with Image.open(ruta_imagen) as imagen_original:
-                    imagen_girada = imagen_original.rotate(180)
-                    memoria = io.BytesIO()
-                    memoria.name = 'girada.jpg'
-                    imagen_girada.save(memoria, 'JPEG')
-                    memoria.seek(0)
-                    await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
+            memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
+            await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=texto_automatico, parse_mode="HTML")
             else:
                 with open(ruta_imagen, 'rb') as foto:
                     await context.bot.send_photo(chat_id=chat_id, photo=foto, caption=texto_dia, parse_mode="HTML", reply_markup=obtener_menu_principal())
