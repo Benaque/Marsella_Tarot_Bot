@@ -72,25 +72,23 @@ def obtener_teclado_persistente():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
-# --- NUEVA FUNCIÓN PARA LA AZTRO API ---
-def obtener_horoscopo_aztro(signo):
-    """Consulta la Aztro API de forma gratuita para obtener el horóscopo del día."""
-    url = f"https://aztro.sameerkumar.website/?sign={signo}&day=today"
+# --- NUEVA FUNCIÓN CON API ESTABLE ---
+def obtener_horoscopo_diario(signo):
+    """Consulta una API estable y gratuita para obtener el horóscopo del día."""
+    # Nota: Esta API espera el signo en minúsculas y usa GET
+    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo}&day=TODAY"
     try:
-        # Aztro requiere una petición POST
-        respuesta = requests.post(url, timeout=5)
+        respuesta = requests.get(url, timeout=5)
         if respuesta.status_code == 200:
             datos = respuesta.json()
-            descripcion = datos.get('description', '')
-            mood = datos.get('mood', '')
-            color = datos.get('color', '')
-            
-            texto_astro = f"🔮 <b>Horóscopo del Día:</b> {descripcion}\n"
-            if mood and color:
-                texto_astro += f"🎨 <i>Ánimo:</i> {mood} | <i>Color:</i> {color}"
-            return texto_astro
+            # La estructura de esta API devuelve la predicción dentro de data -> horoscope_data
+            horoscopo = datos.get("data", {}).get("horoscope_data", "")
+            if horoscopo:
+                # Traducción rápida si la API devuelve el prefijo de fecha
+                horoscopo = horoscopo.split(" - ")[-1] if " - " in horoscopo else horoscopo
+                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo}"
     except Exception as e:
-        logging.error(f"⚠️ Error al conectar con Aztro API: {e}")
+        logging.error(f"⚠️ Error al conectar con API de Horóscopo: {e}")
     
     return None
 
@@ -110,6 +108,25 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         interpretacion = carta["significado_derecho"]
         
     texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
+    
+    if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
+        astro = DATOS_ASTROLOGICOS[signo_usuario]
+        
+        # Sinergia base de tu archivo bot.py
+        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
+        
+        # Llamada a la nueva API
+        horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
+        
+        if horoscopo_api:
+            # Si la API responde, mostramos ambos
+            texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
+        else:
+            # Si la API falla, mostramos tu texto base pero con un aviso para que sepas qué pasó
+            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible temporalmente).</i>"
+        
+    ruta_imagen = f"imagenes/{carta_id}.jpg"
+    return texto_final, ruta_imagen, carta_id, esta_invertida
     
     # Integración de la Sinergia Astrológica + Aztro API
     if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
