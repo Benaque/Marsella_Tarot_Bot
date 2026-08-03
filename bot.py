@@ -4,6 +4,7 @@ import logging
 import os
 import io
 import asyncio
+import sqlite3
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
@@ -17,7 +18,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-# Cargar la base de datos de Tarot
+# Cargar la base de datos de Tarot (Esto sí puede ser JSON porque es de solo lectura)
 with open('tarot_db.json', 'r', encoding='utf-8') as f:
     tarot_db = json.load(f)
 
@@ -64,23 +65,66 @@ def obtener_menu_signos():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# Cargar perfiles de usuarios
-ARCHIVO_PERFILES = 'alarmas_db.json'
+# --- NUEVO: INTEGRACIÓN CON SQLITE ---
+# Definimos la ruta de la base de datos apuntando al Volumen de Railway
+os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedirs('data', exist_ok=True)
+DB_NAME = '/app/data/perfiles.db' if os.path.exists('/app') else 'data/perfiles.db'
 
-def cargar_perfiles():
-    if os.path.exists(ARCHIVO_PERFILES):
-        if os.path.getsize(ARCHIVO_PERFILES) > 0:
-            with open(ARCHIVO_PERFILES, 'r', encoding='utf-8') as f:
-                try:
-                    return json.load(f)
-                except json.JSONDecodeError:
-                    print("⚠️ Advertencia: El archivo de perfiles estaba corrupto o vacío.")
-                    return {}
+def init_db():
+    """Crea la tabla de perfiles si no existe en SQLite."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS perfiles (
+            chat_id TEXT PRIMARY KEY,
+            hora INTEGER,
+            minuto INTEGER,
+            signo TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def obtener_perfil(chat_id):
+    """Obtiene el perfil de un solo usuario desde SQLite."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT hora, minuto, signo FROM perfiles WHERE chat_id = ?', (str(chat_id),))
+    fila = cursor.fetchone()
+    conn.close()
+    if fila:
+        return {"hora": fila[0], "minuto": fila[1], "signo": fila[2]}
     return {}
 
-def guardar_perfiles(perfiles):
-    with open(ARCHIVO_PERFILES, 'w', encoding='utf-8') as f:
-        json.dump(perfiles, f, indent=4)
+def obtener_todos_perfiles():
+    """Obtiene todos los perfiles para restaurar alarmas al inicio."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT chat_id, hora, minuto, signo FROM perfiles')
+    filas = cursor.fetchall()
+    conn.close()
+    perfiles = {}
+    for fila in filas:
+        chat_id, hora, minuto, signo = fila
+        perfiles[chat_id] = {"hora": hora, "minuto": minuto, "signo": signo}
+    return perfiles
+
+def guardar_perfil(chat_id, hora=None, minuto=None, signo=None):
+    """Actualiza o inserta datos de un usuario en SQLite sin borrar los datos existentes."""
+    perfil_actual = obtener_perfil(chat_id)
+    nueva_hora = hora if hora is not None else perfil_actual.get("hora")
+    nuevo_minuto = minuto if minuto is not None else perfil_actual.get("minuto")
+    nuevo_signo = signo if signo is not None else perfil_actual.get("signo")
+    
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO perfiles (chat_id, hora, minuto, signo)
+        VALUES (?, ?, ?, ?)
+    ''', (str(chat_id), nueva_hora, nuevo_minuto, nuevo_signo))
+    conn.commit()
+    conn.close()
+# -------------------------------------
 
 def procesar_imagen_invertida(ruta_imagen):
     with Image.open(ruta_imagen) as imagen_original:
@@ -114,7 +158,6 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
 
-# --- MODIFICADO: Comando /start con imagen de bienvenida ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usuario = update.effective_user.first_name
     mensaje = (
@@ -146,8 +189,8 @@ async def enviar_carta_automatica(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
     chat_id = job.chat_id
     
-    perfiles = cargar_perfiles()
-    signo_usuario = perfiles.get(str(chat_id), {}).get("signo")
+    perfil = obtener_perfil(chat_id)
+    signo_usuario = perfil.get("signo")
     
     texto_final, ruta_imagen, carta_id, esta_invertida = generar_datos_carta_aleatoria(signo_usuario)
     texto_automatico = f"🧞‍♀️ <b>¡Tu carta del día automática ha llegado!</b> 🧞‍♂️\n\n{texto_final}"
@@ -197,12 +240,8 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         zona_horaria = ZoneInfo("America/Mexico_City") 
         hora_programada = time(hour=hora, minute=minuto, tzinfo=zona_horaria)
         
-        perfiles = cargar_perfiles()
-        if str(chat_id) not in perfiles:
-            perfiles[str(chat_id)] = {}
-        perfiles[str(chat_id)]["hora"] = hora
-        perfiles[str(chat_id)]["minuto"] = minuto
-        guardar_perfiles(perfiles)
+        # Guardar en base de datos SQLite
+        guardar_perfil(chat_id, hora=hora, minuto=minuto)
         
         await update.effective_message.reply_text(
             f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
@@ -245,11 +284,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         signo_elegido = query.data.split('_')[2] 
         astro = DATOS_ASTROLOGICOS[signo_elegido]
         
-        perfiles = cargar_perfiles()
-        if str(chat_id) not in perfiles:
-            perfiles[str(chat_id)] = {}
-        perfiles[str(chat_id)]["signo"] = signo_elegido
-        guardar_perfiles(perfiles)
+        # Guardar signo en base de datos SQLite
+        guardar_perfil(chat_id, signo=signo_elegido)
         
         mensaje_exito = f"🌟 ¡Excelente! He guardado tu signo como <b>{astro['nombre']}</b>.\n\nA partir de ahora, tus tiradas incluirán una sinergia basada en tu energía de {astro['elemento']}."
         
@@ -259,8 +295,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     elif query.data == "menu_tres_cartas":
-        perfiles = cargar_perfiles()
-        signo_usuario = perfiles.get(str(chat_id), {}).get("signo")
+        perfil = obtener_perfil(chat_id)
+        signo_usuario = perfil.get("signo")
         
         if query.message.photo:
             try:
@@ -332,7 +368,6 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except BadRequest:
                 pass
 
-    # --- MODIFICADO: Menú de inicio con imagen de bienvenida ---
     elif query.data == 'volver_inicio':
         usuario = update.effective_user.first_name
         mensaje = (
@@ -367,8 +402,8 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     elif query.data == 'tirada_dia':
-        perfiles = cargar_perfiles()
-        signo_usuario = perfiles.get(str(chat_id), {}).get("signo")
+        perfil = obtener_perfil(chat_id)
+        signo_usuario = perfil.get("signo")
         
         try:
             await query.message.delete()
@@ -399,12 +434,12 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML", reply_markup=obtener_menu_principal())
 
 def restaurar_alarmas(app: Application):
-    perfiles = cargar_perfiles()
+    perfiles = obtener_todos_perfiles()
     zona_horaria = ZoneInfo("America/Mexico_City")
     
     restauradas = 0
     for chat_id_str, datos in perfiles.items():
-        if "hora" in datos and "minuto" in datos:
+        if datos.get("hora") is not None and datos.get("minuto") is not None:
             chat_id = int(chat_id_str)
             hora = datos["hora"]
             minuto = datos["minuto"]
@@ -421,13 +456,16 @@ def restaurar_alarmas(app: Application):
             restauradas += 1
         
     if restauradas > 0:
-        print(f"🔮 Se han restaurado {restauradas} alarmas programadas en memoria.")
+        print(f"🔮 Se han restaurado {restauradas} alarmas programadas desde SQLite.")
 
 def main():
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
     
     if not TOKEN:
-        raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe.")
+        raise ValueError("❌ ERROR: La variable de entorno TELEGRAM_TOKEN está vacía o no existe en Railway.")
+        
+    # Iniciar Base de Datos SQLite
+    init_db()
         
     app = Application.builder().token(TOKEN).build()
     
@@ -437,7 +475,6 @@ def main():
     
     restaurar_alarmas(app)
     
-    # --- NUEVO: CONFIGURACIÓN HÍBRIDA (WEBHOOK / POLLING) ---
     PORT = int(os.environ.get('PORT', '8443'))
     WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
     
