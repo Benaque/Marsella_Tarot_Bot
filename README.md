@@ -44,9 +44,11 @@ TELEGRAM_TOKEN → Token proporcionado por @BotFather
 
 ## 🛠 **Tecnologías**
 
-- Python 3.12
-- python-telegram-bot v21
-- Pillow (para rotación de cartas)
+- python-telegram-bot[webhooks,job-queue]>=20.0
+- Pillow>=9.0.0
+- requests>=2.31.0
+- deep-translator>=1.11.4
+- beautifulsoup4>=4.12.0
 - WEBHOOK_URL y SQLlite recomendado
 
 🧙‍♂️ E-mail: jfk4dk10r@mozmail.com 📬
