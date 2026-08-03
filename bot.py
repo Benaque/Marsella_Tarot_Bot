@@ -42,14 +42,14 @@ DATOS_ASTROLOGICOS = {
 
 # --- DICCIONARIO DE COMPATIBILIDAD DE ELEMENTOS ---
 SINOSTRIA_ELEMENTOS = {
-    "Agua 💧_Agua 💧": "Fusión emocional profunda. Gran empatía y comprensión sin palabras, pero deben evitar ahogarse en el dramatismo o el exceso de sensibilidad.",
-    "Agua 💧_Aire 💨": "Razón vs. Emoción. El Aire racionaliza lo que el Agua siente. Pueden complementarse si el Aire aprende a validar las emociones y el Agua respeta el espacio mental del Aire.",
-    "Agua 💧_Fuego 🔥": "Vapor y ebullición. El Fuego calienta las emociones del Agua, trayendo pasión. Sin embargo, el exceso de Fuego puede evaporar la sensibilidad, o el Agua apagar el entusiasmo.",
+    "Agua 💧_Agua 💧": "Fusión emocional profunda. Gran empatía y comprensión sin palabras; deben evitar ahogarse en el dramatismo o el exceso de sensibilidad.",
+    "Agua 💧_Aire 💨": "Razón vs. emoción. El Aire racionaliza lo que el Agua siente; pueden complementarse si el Aire aprende a validar las emociones y si el Agua respeta el espacio mental del Aire.",
+    "Agua 💧_Fuego 🔥": "Vapor y ebullición. El Fuego calienta las emociones del Agua, trayendo pasión; sin embargo, el exceso de Fuego puede evaporar la sensibilidad, o el Agua apagar el entusiasmo.",
     "Agua 💧_Tierra 🌍": "Nutrición mutua. El Agua fertiliza la Tierra para que dé frutos, y la Tierra le da un cauce seguro al Agua. Una relación sumamente protectora y duradera.",
     "Aire 💨_Aire 💨": "Conexión mental estimulante. Excelentes conversaciones, libertad e ideas compartidas. El reto es bajar a la tierra y no quedarse solo en el plano de las ideas o la amistad.",
     "Aire 💨_Fuego 🔥": "El Aire aviva el Fuego. Relación llena de aventuras, pasión y dinamismo. Se inspiran mutuamente para actuar y explorar, logrando una excelente química.",
-    "Aire 💨_Tierra 🌍": "Lo práctico y lo intelectual. El Aire aporta visiones amplias y la Tierra se encarga de estructurarlas. Deben ser pacientes, pues marchan a ritmos y enfoques muy distintos.",
-    "Fuego 🔥_Fuego 🔥": "Pasión explosiva y acción constante. Mucha vitalidad, entusiasmo y franqueza. Deben cuidar de no chocar sus egos o entrar en competencias desgastantes.",
+    "Aire 💨_Tierra 🌍": "Lo práctico y lo intelectual. El Aire aporta visiones amplias y la Tierra se encarga de estructurarlas; deben ser pacientes, pues marchan a ritmos y enfoques muy distintos.",
+    "Fuego 🔥_Fuego 🔥": "Pasión explosiva y acción constante. Mucha vitalidad, entusiasmo y franqueza; deben cuidar de no chocar sus egos o entrar en competencias desgastantes.",
     "Fuego 🔥_Tierra 🌍": "Impulso y estructura. El Fuego tiene la iniciativa y la Tierra la materializa. Si logran mediar entre la impulsividad del Fuego y la cautela de la Tierra, serán invencibles.",
     "Tierra 🌍_Tierra 🌍": "Estabilidad, lealtad y compromiso absoluto. Buscan construir a largo plazo con bases muy sólidas. El único reto es evitar que la relación caiga en la rutina o el aburrimiento."
 }
@@ -520,6 +520,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
         usuario = update.effective_user.first_name
         await enviar_menu_ajustes(chat_id, context, usuario)
+    
     elif query.data.startswith('pareja_'):
         signo_pareja = query.data.split('_')[1]
         perfil = obtener_perfil(chat_id)
