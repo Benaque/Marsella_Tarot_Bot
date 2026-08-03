@@ -6,6 +6,7 @@ import io
 import asyncio
 import sqlite3
 import requests
+from deep_translator import GoogleTranslator
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
@@ -72,27 +73,41 @@ def obtener_teclado_persistente():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
-# --- NUEVA FUNCIÓN CON API ESTABLE ---
-def obtener_horoscopo_diario(signo):
-    """Consulta una API estable y gratuita para obtener el horóscopo del día."""
-    # Nota: Esta API espera el signo en minúsculas y usa GET
-    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo}&day=TODAY"
+# --- NUEVA FUNCIÓN CON API ESTABLE Y TRADUCTOR ---
+def obtener_horoscopo_diario(signo_espanol):
+    """Consulta la API en inglés y traduce el resultado al español."""
+    
+    # 1. Diccionario puente: Traduce tu signo guardado al formato que la API exige
+    traduccion_signos = {
+        "aries": "aries", "tauro": "taurus", "geminis": "gemini",
+        "cancer": "cancer", "leo": "leo", "virgo": "virgo",
+        "libra": "libra", "escorpio": "scorpio", "sagitario": "sagittarius",
+        "capricornio": "capricorn", "acuario": "aquarius", "piscis": "pisces"
+    }
+    
+    signo_ingles = traduccion_signos.get(signo_espanol, "aries")
+    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo_ingles}&day=TODAY"
+    
     try:
-        respuesta = requests.get(url, timeout=5)
+        respuesta = requests.get(url, timeout=7)
         if respuesta.status_code == 200:
             datos = respuesta.json()
-            # La estructura de esta API devuelve la predicción dentro de data -> horoscope_data
-            horoscopo = datos.get("data", {}).get("horoscope_data", "")
-            if horoscopo:
-                # Traducción rápida si la API devuelve el prefijo de fecha
-                horoscopo = horoscopo.split(" - ")[-1] if " - " in horoscopo else horoscopo
-                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo}"
+            horoscopo_ingles = datos.get("data", {}).get("horoscope_data", "")
+            
+            if horoscopo_ingles:
+                # Limpiar el prefijo de la fecha si la API lo incluye
+                horoscopo_ingles = horoscopo_ingles.split(" - ")[-1] if " - " in horoscopo_ingles else horoscopo_ingles
+                
+                # 2. Traducir el mensaje en tiempo real
+                horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
+                
+                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
     except Exception as e:
-        logging.error(f"⚠️ Error al conectar con API de Horóscopo: {e}")
+        logging.error(f"⚠️ Error al conectar con API o Traductor: {e}")
     
     return None
 
-# --- MODIFICACIÓN EN LA LÓGICA DE CARTAS ---
+# --- MODIFICACIÓN EN LA LÓGICA DE CARTAS (Limpia) ---
 def generar_datos_carta_aleatoria(signo_usuario=None):
     claves_cartas = list(tarot_db.keys())
     carta_id = random.choice(claves_cartas)
@@ -115,14 +130,14 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         # Sinergia base de tu archivo bot.py
         sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, al integrar el mensaje de esta carta enfócate en {astro['enfoque']}."
         
-        # Llamada a la nueva API
+        # Llamada a la API (pasándole el signo en español que extraemos de tu BD)
         horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
         
         if horoscopo_api:
-            # Si la API responde, mostramos ambos
+            # Si la API responde y traduce bien, mostramos ambos
             texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
         else:
-            # Si la API falla, mostramos tu texto base pero con un aviso para que sepas qué pasó
+            # Si la API o el traductor fallan, mostramos tu texto base con aviso de error
             texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible temporalmente).</i>"
         
     ruta_imagen = f"imagenes/{carta_id}.jpg"
