@@ -22,7 +22,7 @@ Interpretaciones personales y textos extraídos de las obras:
 
 ## 📁 Estructura del Proyecto
 
-## 🚀 Ejecutar localmente
+## 🚀 Tecnología para ejecución local
 
 ```bash
 # Instalar librería de Python
@@ -42,7 +42,7 @@ source venv/bin/activate
 
 TELEGRAM_TOKEN → Token proporcionado por @BotFather
 
-## 🛠 **Tecnologías**
+## 🛠 **Tecnologías para ejecución pública**
 
 - python-telegram-bot[webhooks,job-queue]>=20.0
 - Pillow>=9.0.0
