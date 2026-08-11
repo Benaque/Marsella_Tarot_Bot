@@ -522,13 +522,26 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await enviar_menu_ajustes(chat_id, context, usuario)
     
     elif query.data.startswith('pareja_'):
-        signo_pareja = query.data.split('_')[1]
+        signo_pareja = query.data.split('_')[1].capitalize()
         perfil = obtener_perfil(chat_id)
         signo_usuario = perfil.get("signo")
         
         astro_user = DATOS_ASTROLOGICOS[signo_usuario]
         astro_pareja = DATOS_ASTROLOGICOS[signo_pareja]
-        
+
+        if not signo_usuario or signo_usuario not in DATOS_ASTROLOGICOS:
+            await query.answer("⚠️ Faltan datos astrológicos", show_alert=True)
+            
+            await query.edit_message_text(
+                "🔮 **Los astros están incompletos.**\n\n"
+                "Para calcular la compatibilidad, primero necesito conocer tu propio signo zodiacal.\n"
+                "Por favor, ve al **⚙️ Menú de Ajustes** y regístralo allí."
+            )
+            return
+
+        astro_user = DATOS_ASTROLOGICOS[signo_usuario]
+        # ... (continúa el resto de tu lógica de compatibilidad) ...
+
         # Ordenamos los elementos alfabéticamente para buscar la combinación exacta en el diccionario
         elementos = sorted([astro_user['elemento'], astro_pareja['elemento']])
         llave_sinergia = f"{elementos[0]}_{elementos[1]}"
