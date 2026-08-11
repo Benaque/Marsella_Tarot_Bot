@@ -526,9 +526,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         perfil = obtener_perfil(chat_id)
         signo_usuario = perfil.get("signo")
         
-        astro_user = DATOS_ASTROLOGICOS[signo_usuario]
-        astro_pareja = DATOS_ASTROLOGICOS[signo_pareja]
-
+        # 🛡️ 1. LA GUARDIA VA PRIMERO (Verificamos si el signo existe)
         if not signo_usuario or signo_usuario not in DATOS_ASTROLOGICOS:
             await query.answer("⚠️ Faltan datos astrológicos", show_alert=True)
             
@@ -537,9 +535,12 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Para calcular la compatibilidad, primero necesito conocer tu propio signo zodiacal.\n"
                 "Por favor, ve al **⚙️ Menú de Ajustes** y regístralo allí."
             )
-            return
+            return # Si no hay signo, detenemos todo aquí.
 
+        # 2. SI SOBREVIVE A LA GUARDIA, BUSCAMOS EN EL DICCIONARIO
         astro_user = DATOS_ASTROLOGICOS[signo_usuario]
+        astro_pareja = DATOS_ASTROLOGICOS[signo_pareja]
+
         # ... (continúa el resto de tu lógica de compatibilidad) ...
 
         # Ordenamos los elementos alfabéticamente para buscar la combinación exacta en el diccionario
