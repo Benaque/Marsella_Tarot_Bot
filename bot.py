@@ -479,7 +479,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     # 🔦 LANZAMOS LA BENGALA DE LUZ:
     print(f"🔮 BENGALA - El usuario presionó el botón con datos: {query.data}")
-    
+
     await query.answer() 
     chat_id = update.effective_chat.id
 
@@ -525,7 +525,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await enviar_menu_ajustes(chat_id, context, usuario)
     
     elif query.data.startswith('pareja_'):
-        signo_pareja = query.data.split('_')[1].capitalize()
+        signo_pareja = query.data.split('_')[1].lower()
         perfil = obtener_perfil(chat_id)
         signo_usuario = perfil.get("signo")
         
