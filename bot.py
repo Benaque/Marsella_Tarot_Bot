@@ -477,6 +477,9 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    # 🔦 LANZAMOS LA BENGALA DE LUZ:
+    print(f"🔮 BENGALA - El usuario presionó el botón con datos: {query.data}")
+    
     await query.answer() 
     chat_id = update.effective_chat.id
 
