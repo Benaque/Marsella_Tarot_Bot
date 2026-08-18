@@ -75,8 +75,8 @@ def obtener_menu_pareja():
 # --- MENÚS ---
 def obtener_menu_principal():
     keyboard = [
-        [InlineKeyboardButton("⏰ Programar Carta Diaria", callback_data='menu_programar')],
-        [InlineKeyboardButton("⚙️ Configurar mi Signo", callback_data='menu_signo')]
+        [InlineKeyboardButton("⏰ Programar carta diaria", callback_data='menu_programar')],
+        [InlineKeyboardButton("⚙️ Configurar mi signo", callback_data='menu_signo')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -94,7 +94,7 @@ def obtener_menu_signos():
         [InlineKeyboardButton("♑ Capricornio", callback_data='set_signo_capricornio'),
          InlineKeyboardButton("♒ Acuario", callback_data='set_signo_acuario'),
          InlineKeyboardButton("♓ Piscis", callback_data='set_signo_piscis')],
-        [InlineKeyboardButton("🔙 Volver al Inicio", callback_data='volver_inicio')]
+        [InlineKeyboardButton("🔙 Volver al inicio", callback_data='volver_inicio')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -216,10 +216,10 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
 
     nombre = carta["nombre"]
     if esta_invertida:
-        titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)"
+        titulo = f"🃏 <b>{nombre}</b> (invertida 🙃)"
         interpretacion = carta["significado_invertido"]
     else:
-        titulo = f"🃏 <b>{nombre}</b> (Al Derecho ⭐)"
+        titulo = f"🃏 <b>{nombre}</b> (al derecho ⭐)"
         interpretacion = carta["significado_derecho"]
         
     texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
@@ -228,7 +228,7 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         astro = DATOS_ASTROLOGICOS[signo_usuario]
         
         # Sinergia base
-        sinergia_base = f"✨ <b>Sinergia Astrológica ({astro['nombre']}):</b>\nComo tu energía es de {astro['elemento']}, enfoca el mensaje en {astro['enfoque']}."
+        sinergia_base = f"✨ <b>Sinergia astrológica ({astro['nombre']}):</b>\nTu energía es de {astro['elemento']}, puedes enfocar el mensaje en {astro['enfoque']}."
         
         # Llamada a la API estable y traducción
         horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
@@ -236,7 +236,7 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         if horoscopo_api:
             texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
         else:
-            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible temporalmente).</i>"
+            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible).</i>"
         
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
@@ -286,10 +286,10 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
             
             if esta_invertida:
                 significado = datos_carta['significado_invertido']
-                titulo_carta = f"{nombre_real} (Invertida 🙃)"
+                titulo_carta = f"{nombre_real} (invertida 🙃)"
             else:
                 significado = datos_carta['significado_derecho']
-                titulo_carta = f"{nombre_real} (Al derecho ⭐)"
+                titulo_carta = f"{nombre_real} (al derecho ⭐)"
             
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
             
@@ -331,8 +331,8 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
 
 async def enviar_menu_ajustes(chat_id, context, usuario):
     mensaje = (
-        f"¡Hola, {usuario}! 🔮 Bienvenido a los Ajustes de <b>Mozárabe Tarot</b>.\n\n"
-        "Desde aquí puedes programar tu lectura diaria (Ej: <code>/programar 08:30</code>) "
+        f"¡Hola, {usuario}! 🔮 Bienvenido a los ajustes de <b>Mozárabe Tarot</b>.\n\n"
+        "Aquí puedes programar tu lectura diaria (ej: <code>/programar 08:30</code>) "
         "o configurar tu signo zodiacal para recibir sinergias personalizadas."
     )
     ruta_bienvenida = "imagenes/5L5ZT.jpg"
@@ -384,7 +384,7 @@ async def manejar_texto(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             await update.message.reply_text(
-                "💞 <b>Tirada de Compatibilidad</b>\n\n¿Cuál es el signo de tu persona especial?",
+                "💞 <b>Tirada de compatibilidad</b>\n\n¿Cuál es el signo de la persona especial?",
                 parse_mode="HTML",
                 reply_markup=obtener_menu_pareja()
             )
@@ -496,7 +496,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=chat_id, text=mensaje_instrucciones, parse_mode="HTML", reply_markup=obtener_menu_principal())
 
     elif query.data == 'menu_signo':
-        mensaje_signo = "✨ <b>Sinergia Astrológica</b> ✨\n\nElige tu signo zodiacal para que el Tarot Mozárabe cruce la energía de tu elemento con el mensaje de tus cartas:"
+        mensaje_signo = "✨ <b>Sinergia astrológica</b> ✨\n\nElige tu signo zodiacal para que Mozárabe Tarot cruce la energía de tu elemento con el mensaje de tus cartas:"
         try:
             await query.message.delete()
         except BadRequest:
@@ -536,7 +536,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(
                 "🔮 **Los astros están incompletos.**\n\n"
                 "Para calcular la compatibilidad, primero necesito conocer tu propio signo zodiacal.\n"
-                "Por favor, ve al **⚙️ Menú de Ajustes** y regístralo allí."
+                "Por favor, ve al **⚙️ Menú de ajustes** y regístralo ahí."
             )
             return # Si no hay signo, detenemos todo aquí.
 
@@ -558,7 +558,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         esta_invertida = random.choice([True, False])
         
         nombre = carta["nombre"]
-        titulo = f"🃏 <b>{nombre}</b> (Invertida 🙃)" if esta_invertida else f"🃏 <b>{nombre}</b> (Al Derecho ⭐)"
+        titulo = f"🃏 <b>{nombre}</b> (invertida 🙃)" if esta_invertida else f"🃏 <b>{nombre}</b> (al derecho ⭐)"
         interpretacion = carta["significado_invertido"] if esta_invertida else carta["significado_derecho"]
         
         mensaje_final = (
