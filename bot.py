@@ -107,6 +107,7 @@ def obtener_teclado_persistente():
 
 # --- FUNCIÓN DE HORÓSCOPO (API Astrology.com / Ohmanda) ---
 def obtener_horoscopo_diario(signo_espanol):
+    """Consulta la API Horoscope-App en formato JSON y traduce la predicción."""
     traduccion_signos = {
         "aries": "aries", "tauro": "taurus", "geminis": "gemini",
         "cancer": "cancer", "leo": "leo", "virgo": "virgo",
@@ -115,18 +116,20 @@ def obtener_horoscopo_diario(signo_espanol):
     }
     
     signo_en = traduccion_signos.get(signo_espanol.lower(), "aries")
-    url = f"https://ohmanda.com/api/horoscope/{signo_en}/"
+    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo_en}&day=today"
     
     try:
-        respuesta = requests.get(url, timeout=7)
+        respuesta = requests.get(url, timeout=8)
         if respuesta.status_code == 200:
             datos = respuesta.json()
-            horoscopo_ingles = datos.get("horoscope", "")
+            # Esta API entrega el texto dentro de data -> horoscope_data
+            horoscopo_ingles = datos.get("data", {}).get("horoscope_data", "")
+            
             if horoscopo_ingles:
                 horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
-                return f"🔮 <b>Horóscopo del Día:</b>\n{horoscopo_espanol}"
+                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
     except Exception as e:
-        logging.error(f"⚠️ Error obteniendo horóscopo: {e}")
+        logging.error(f"⚠️ Error al conectar con Horoscope-App API: {e}")
     
     return None
 
