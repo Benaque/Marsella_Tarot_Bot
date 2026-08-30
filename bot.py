@@ -54,7 +54,7 @@ SINOSTRIA_ELEMENTOS = {
     "Tierra 🌍_Tierra 🌍": "Estabilidad, lealtad y compromiso absoluto. Buscan construir a largo plazo con bases muy sólidas. El único reto es evitar que la relación caiga en la rutina o el aburrimiento."
 }
 
-# --- MENÚ PARA ELEGIR PAREJA ---
+# --- MENÚS ---
 def obtener_menu_pareja():
     keyboard = [
         [InlineKeyboardButton("♈ Aries", callback_data='pareja_aries'),
@@ -72,7 +72,6 @@ def obtener_menu_pareja():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# --- MENÚS ---
 def obtener_menu_principal():
     keyboard = [
         [InlineKeyboardButton("⏰ Programar carta diaria", callback_data='menu_programar')],
@@ -106,44 +105,28 @@ def obtener_teclado_persistente():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
-# --- NUEVA FUNCIÓN CON API ESTABLE Y TRADUCTOR ---
-from bs4 import BeautifulSoup
-
+# --- FUNCIÓN DE HORÓSCOPO (API Astrology.com / Ohmanda) ---
 def obtener_horoscopo_diario(signo_espanol):
-    """Extrae el horóscopo directamente del código fuente web, saltándose las APIs."""
-    
-    numeros_signos = {
-        "aries": 1, "tauro": 2, "geminis": 3, "cancer": 4,
-        "leo": 5, "virgo": 6, "libra": 7, "escorpio": 8,
-        "sagitario": 9, "capricornio": 10, "acuario": 11, "piscis": 12
+    traduccion_signos = {
+        "aries": "aries", "tauro": "taurus", "geminis": "gemini",
+        "cancer": "cancer", "leo": "leo", "virgo": "virgo",
+        "libra": "libra", "escorpio": "scorpio", "sagitario": "sagittarius",
+        "capricornio": "capricorn", "acuario": "aquarius", "piscis": "pisces"
     }
     
-    signo_num = numeros_signos.get(signo_espanol, 1)
-    url = f"https://www.horoscope.com/us/horoscopes/general/horoscope-general-daily-today.aspx?sign={signo_num}"
+    signo_en = traduccion_signos.get(signo_espanol.lower(), "aries")
+    url = f"https://ohmanda.com/api/horoscope/{signo_en}/"
     
     try:
-        # Nos camuflamos con una firma de sistema Linux para evitar bloqueos
-        headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'}
-        respuesta = requests.get(url, headers=headers, timeout=7)
-        
+        respuesta = requests.get(url, timeout=7)
         if respuesta.status_code == 200:
-            soup = BeautifulSoup(respuesta.text, 'html.parser')
-            
-            # Navegamos por el DOM para encontrar el primer párrafo principal
-            main_tag = soup.find('main')
-            if main_tag:
-                p_tag = main_tag.find('p')
-                if p_tag:
-                    parrafo = p_tag.text
-                    # Filtramos la fecha del inicio (ej. "Aug 3, 2026 - ")
-                    horoscopo_ingles = parrafo.split(" - ")[-1] if " - " in parrafo else parrafo
-                    
-                    # Traducimos al vuelo
-                    horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
-                    return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
-                    
+            datos = respuesta.json()
+            horoscopo_ingles = datos.get("horoscope", "")
+            if horoscopo_ingles:
+                horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
+                return f"🔮 <b>Horóscopo del Día:</b>\n{horoscopo_espanol}"
     except Exception as e:
-        logging.error(f"⚠️ Error de Scraping o Traducción: {e}")
+        logging.error(f"⚠️ Error obteniendo horóscopo: {e}")
     
     return None
 
@@ -224,19 +207,11 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         
     texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
     
+    # Horóscopo diario directo (sin texto de sinergia de elementos)
     if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
-        astro = DATOS_ASTROLOGICOS[signo_usuario]
-        
-        # Sinergia base
-        sinergia_base = f"✨ <b>Sinergia astrológica ({astro['nombre']}):</b>\nTu energía es de {astro['elemento']}, puedes enfocar el mensaje en {astro['enfoque']}."
-        
-        # Llamada a la API estable y traducción
         horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
-        
         if horoscopo_api:
-            texto_final += f"\n\n{sinergia_base}\n\n{horoscopo_api}"
-        else:
-            texto_final += f"\n\n{sinergia_base}\n\n<i>(El oráculo astrológico está recargando energías, predicción diaria no disponible).</i>"
+            texto_final += f"\n\n{horoscopo_api}"
         
     ruta_imagen = f"imagenes/{carta_id}.jpg"
     return texto_final, ruta_imagen, carta_id, esta_invertida
@@ -269,9 +244,6 @@ async def ejecutar_tirada_dia(chat_id, context):
         await context.bot.send_message(chat_id=chat_id, text=f"⚠️ (No se encontró la imagen {carta_id}.jpg)\n\n{texto_dia}", parse_mode="HTML")
 
 async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
-    perfil = obtener_perfil(chat_id)
-    signo_usuario = perfil.get("signo")
-    
     try:
         claves_cartas = list(tarot_db.keys())
         cartas_seleccionadas = random.sample(claves_cartas, 3)
@@ -292,7 +264,6 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
                 titulo_carta = f"{nombre_real} (al derecho ⭐)"
             
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
-            
             ruta_imagen = f"imagenes/{clave}.jpg" 
             
             try:
@@ -333,7 +304,7 @@ async def enviar_menu_ajustes(chat_id, context, usuario):
     mensaje = (
         f"¡Hola, {usuario}! 🔮 Bienvenido a los ajustes de <b>Mozárabe Tarot</b>.\n\n"
         "Aquí puedes programar tu lectura diaria (ej: <code>/programar 08:30</code>) "
-        "o configurar tu signo zodiacal para recibir sinergias personalizadas."
+        "o configurar tu signo zodiacal para recibir tu predicción personalizada."
     )
     ruta_bienvenida = "imagenes/5L5ZT.jpg"
     
@@ -460,7 +431,6 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
             name=nombre_tarea
         )
         
-        # 🌟 Añadimos el teclado aquí para que no desaparezca al programar con éxito
         await update.effective_message.reply_text(
             f"✅ ¡Perfecto, {usuario}! He programado tu lectura diaria para las <b>{hora_texto}</b> todos los días.",
             parse_mode="HTML",
@@ -468,7 +438,6 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
     except (IndexError, ValueError):
-        # 🌟 Añadimos el teclado también en caso de error de formato
         await update.effective_message.reply_text(
             "❌ Formato incorrecto. Por favor usa:\n<code>/programar HH:MM</code> (ej: <code>/programar 07:15</code>)",
             parse_mode="HTML",
@@ -477,9 +446,6 @@ async def programar_hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    # 🔦 LANZAMOS LA BENGALA DE LUZ:
-    print(f"🔮 BENGALA - El usuario presionó el botón con datos: {query.data}")
-
     await query.answer() 
     chat_id = update.effective_chat.id
 
@@ -496,7 +462,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=chat_id, text=mensaje_instrucciones, parse_mode="HTML", reply_markup=obtener_menu_principal())
 
     elif query.data == 'menu_signo':
-        mensaje_signo = "✨ <b>Sinergia astrológica</b> ✨\n\nElige tu signo zodiacal para que Mozárabe Tarot cruce la energía de tu elemento con el mensaje de tus cartas:"
+        mensaje_signo = "✨ <b>Configura tu Signo Zodiacal</b> ✨\n\nElige tu signo para recibir tu horóscopo diario y consultar compatibilidades:"
         try:
             await query.message.delete()
         except BadRequest:
@@ -508,8 +474,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         astro = DATOS_ASTROLOGICOS[signo_elegido]
         
         guardar_perfil(chat_id, signo=signo_elegido)
-        
-        mensaje_exito = f"🌟 ¡Excelente! He guardado tu signo como <b>{astro['nombre']}</b>.\n\nA partir de ahora, tus tiradas incluirán una sinergia basada en tu energía de {astro['elemento']}."
+        mensaje_exito = f"🌟 ¡Excelente! He guardado tu signo como <b>{astro['nombre']}</b>."
         
         try:
             await query.message.edit_text(text=mensaje_exito, parse_mode="HTML", reply_markup=obtener_menu_principal())
@@ -529,29 +494,23 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         perfil = obtener_perfil(chat_id)
         signo_usuario = perfil.get("signo")
         
-        # 🛡️ 1. LA GUARDIA VA PRIMERO (Verificamos si el signo existe)
         if not signo_usuario or signo_usuario not in DATOS_ASTROLOGICOS:
             await query.answer("⚠️ Faltan datos astrológicos", show_alert=True)
-            
             await query.edit_message_text(
-                "🔮 **Los astros están incompletos.**\n\n"
+                "🔮 <b>Los astros están incompletos.</b>\n\n"
                 "Para calcular la compatibilidad, primero necesito conocer tu propio signo zodiacal.\n"
-                "Por favor, ve al **⚙️ Menú de ajustes** y regístralo ahí."
+                "Por favor, ve a <b>⚙️ Ajustes de signo</b> y regístralo ahí.",
+                parse_mode="HTML"
             )
-            return # Si no hay signo, detenemos todo aquí.
+            return
 
-        # 2. SI SOBREVIVE A LA GUARDIA, BUSCAMOS EN EL DICCIONARIO
         astro_user = DATOS_ASTROLOGICOS[signo_usuario]
         astro_pareja = DATOS_ASTROLOGICOS[signo_pareja]
 
-        # ... (continúa el resto de tu lógica de compatibilidad) ...
-
-        # Ordenamos los elementos alfabéticamente para buscar la combinación exacta en el diccionario
         elementos = sorted([astro_user['elemento'], astro_pareja['elemento']])
         llave_sinergia = f"{elementos[0]}_{elementos[1]}"
         texto_sinergia = SINOSTRIA_ELEMENTOS.get(llave_sinergia, "Sinergia en proceso...")
         
-        # Generar la carta del vínculo
         claves_cartas = list(tarot_db.keys())
         carta_id = random.choice(claves_cartas)
         carta = tarot_db[carta_id]
