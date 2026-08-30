@@ -105,21 +105,66 @@ def obtener_teclado_persistente():
 
 # --- FUNCIÓN DE HORÓSCOPO (DETERMINISTA LOCAL) ---
 def obtener_horoscopo_diario(signo_espanol):
+    """Genera una predicción astrológica diaria rica y variada de forma determinista según la fecha."""
     signo = signo_espanol.lower()
     if signo not in DATOS_ASTROLOGICOS:
         return None
 
+    # Semilla diaria única por signo: cambia a medianoche y es idéntica todo el día
     fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
     semilla = f"{signo}_{fecha_hoy}"
     rng = random.Random(semilla)
 
     enfoques = [
+        # --- Acción, Metas y Proyectos ---
         "Un flujo de energía renovada impulsa tus proyectos personales. Es momento de confiar en tus corazonadas y no dudar al tomar la iniciativa.",
-        "La configuración astral favorece la introspección y el orden financiero. Prioriza lo esencial y evita tomar compromisos apresurados.",
-        "Se abren canales fluidos de comunicación. Una conversación pendiente revelará acuerdos valiosos y aclarará dudas en tus relaciones.",
-        "Tu intuición se encuentra especialmente aguda. Escucha lo que sientes antes de reaccionar ante cambios imprevistos en tu entorno.",
         "Momento ideal para proyectar tus metas a mediano plazo. Tu disciplina y constancia serán la clave para destrabar asuntos pendientes.",
-        "Las tensiones recientes comienzan a disiparse. Concéntrate en recuperar tu balance interno y rodearte de espacios de tranquilidad."
+        "Surge una oportunidad inesperada para colaborar o sumar fuerzas. Deja a un lado el control individual y confía en el talento colectivo.",
+        "La creatividad y la imaginación están en su punto más alto. Canaliza esa inspiración en proyectos personales o soluciones ingeniosas.",
+        "Tu capacidad analítica y sentido práctico están muy afilados. Hallarás la salida a un obstáculo técnico o logístico que parecía estancado.",
+        "Jornada propicia para sembrar bases sólidas. Cualquier hábito o acuerdo iniciado con seriedad hoy mostrará resultados duraderos.",
+        "Una idea que considerabas descartada cobra nueva relevancia. Dale una segunda oportunidad bajo una perspectiva más madura.",
+        "El esfuerzo silencioso que has dedicado en semanas previas comenzará a dar señales claras de avance. Mantén el ritmo.",
+        "Es un día favorable para negociaciones estratégicas y acuerdos comerciales. Tu palabra tendrá peso y autoridad.",
+        "Evita postergar esa tarea compleja que vienes aplazando. Resolverla a primera hora liberará una enorme carga mental.",
+
+        # --- Finanzas y Recursos ---
+        "La configuración astral favorece la introspección y el orden financiero. Prioriza lo esencial y evita tomar compromisos apresurados.",
+        "La cautela será tu mejor aliada hoy. Analiza los detalles prácticos antes de firmar acuerdos o comprometer recursos materiales.",
+        "Buen momento para revisar presupuestos y eliminar fugas de recursos. La sobriedad en tus decisiones te dará tranquilidad a futuro.",
+        "Una oportunidad de inversión o mejora profesional requiere investigación minuciosa. No te dejes llevar por promesas apresuradas.",
+        "Tu sentido del valor propio se refleja en cómo administras tu tiempo. Dedica tus mejores horas a aquello que realmente construye.",
+
+        # --- Vínculos, Comunicación y Relaciones ---
+        "Se abren canales fluidos de comunicación. Una conversación pendiente revelará acuerdos valiosos y aclarará dudas en tus relaciones.",
+        "Tu magnetismo y carisma se intensifican. Aprovecha esta vibración para negociar con firmeza, exponer tus ideas o conectar a nivel afectivo.",
+        "Día propicio para poner límites sanos. Proteger tu tiempo y energía emocional evitará desgastes innecesarios en tu entorno cercano.",
+        "Las emociones pueden sentirse intensas. Tomar distancia antes de reaccionar evitará fricciones innecesarias en conversaciones sensibles.",
+        "Una actitud empática destrabará un malentendido con alguien cercano. Escucha activamente antes de argumentar tu postura.",
+        "El clima astral favorece la reconciliación y el diálogo sereno. Expresar lo que sientes sin reproches abrirá nuevas puertas afectivas.",
+        "Aprende a delegar y permitir que otros asuman sus responsabilidades. Cargar con asuntos ajenos solo retrasará tus propias prioridades.",
+        "Un encuentro casual o mensaje inesperado traerá una perspectiva fresca que cambiará favorablemente tu estado de ánimo.",
+
+        # --- Claridad Mental, Intuición y Discernimiento ---
+        "Tu intuición se encuentra especialmente aguda. Escucha lo que sientes antes de reaccionar ante cambios imprevistos en tu entorno.",
+        "Una revelación o punto de vista inesperado aclarará un dilema reciente. Mantén una postura receptiva y libre de juicios automáticos.",
+        "Evita la dispersión mental o asumir más tareas de las que puedes abarcar. Enfocarte en una sola prioridad a la vez garantizará el éxito.",
+        "El discernimiento será tu escudo ante información confusa o rumores. Verifica los hechos antes de tomar una postura definitiva.",
+        "La mente se aclara tras días de incertidumbre. Verás el panorama general con nitidez para tomar esa decisión pendiente.",
+        "No permitas que el ruido exterior opaque tu voz interior. Un momento de silencio te dará la respuesta exacta que buscas.",
+        "La duda sistemática solo frena tu avance. Si los datos fundamentales son sólidos, confía en tu criterio y da el siguiente paso.",
+
+        # --- Bienestar, Equilibrio y Renovación ---
+        "Las tensiones recientes comienzan a disiparse. Concéntrate en recuperar tu balance interno y rodearte de espacios de tranquilidad.",
+        "Ciclo favorable para soltar apegos y cerrar capítulos pendientes. Abrir espacio a lo nuevo requiere dejar ir lo que ya cumplió su ciclo.",
+        "Las energías del día invitan a atender tu vitalidad física. Realizar pausas conscientes y ajustar tus horas de descanso renovará tu rendimiento.",
+        "Momento para reconocer y validar tus propios avances. Celebrar los logros intermedios fortalecerá tu determinación ante nuevos retos.",
+        "El clima astral favorece la flexibilidad ante imprevistos. Adaptarte con rapidez al cambio de planes te abrirá puertas insospechadas.",
+        "Día propicio para desintoxicar tu entorno físico y digital. El orden a tu alrededor se traducirá directamente en claridad interna.",
+        "Tu cuerpo te pide bajar el ritmo de exigencia. Un descanso oportuno hoy evitará un agotamiento improductivo mañana.",
+        "La paciencia no es inacción, sino maduración. Permite que los procesos sigan su curso natural sin forzar desenlaces prematuros.",
+        "La gratitud por los pequeños logros cotidianos cambiará tu frecuencia mental, atrayendo oportunidades más armónicas.",
+        "Un cambio de rutina o paseo al aire libre renovará tu energía vital si sientes que la monotonía está bloqueando tu inspiración."
     ]
 
     consejos = [
@@ -127,7 +172,27 @@ def obtener_horoscopo_diario(signo_espanol):
         "Palabra clave de hoy: <b>Paciencia</b>.",
         "Palabra clave de hoy: <b>Claridad mental</b>.",
         "Palabra clave de hoy: <b>Equilibrio</b>.",
-        "Palabra clave de hoy: <b>Transformación</b>."
+        "Palabra clave de hoy: <b>Transformación</b>.",
+        "Palabra clave de hoy: <b>Intuición</b>.",
+        "Palabra clave de hoy: <b>Límites</b>.",
+        "Palabra clave de hoy: <b>Prudencia</b>.",
+        "Palabra clave de hoy: <b>Enfoque</b>.",
+        "Palabra clave de hoy: <b>Renovación</b>.",
+        "Palabra clave de hoy: <b>Flexibilidad</b>.",
+        "Palabra clave de hoy: <b>Discernimiento</b>.",
+        "Palabra clave de hoy: <b>Sobriedad</b>.",
+        "Palabra clave de hoy: <b>Asertividad</b>.",
+        "Palabra clave de hoy: <b>Constancia</b>.",
+        "Palabra clave de hoy: <b>Aceptación</b>.",
+        "Palabra clave de hoy: <b>Empatía</b>.",
+        "Palabra clave de hoy: <b>Gratitud</b>.",
+        "Palabra clave de hoy: <b>Autocuidado</b>.",
+        "Palabra clave de hoy: <b>Integridad</b>.",
+        "Palabra clave de hoy: <b>Desapego</b>.",
+        "Palabra clave de hoy: <b>Presencia</b>.",
+        "Palabra clave de hoy: <b>Templanza</b>.",
+        "Palabra clave de hoy: <b>Estrategia</b>.",
+        "Palabra clave de hoy: <b>Confianza</b>."
     ]
 
     texto_prediccion = rng.choice(enfoques)
