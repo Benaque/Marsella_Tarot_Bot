@@ -5,8 +5,6 @@ import os
 import io
 import asyncio
 import sqlite3
-import requests
-from deep_translator import GoogleTranslator
 from zoneinfo import ZoneInfo
 from datetime import time
 import datetime
@@ -48,7 +46,7 @@ SINOSTRIA_ELEMENTOS = {
     "Agua 💧_Tierra 🌍": "Nutrición mutua. El Agua fertiliza la Tierra para que dé frutos, y la Tierra le da un cauce seguro al Agua. Una relación sumamente protectora y duradera.",
     "Aire 💨_Aire 💨": "Conexión mental estimulante. Excelentes conversaciones, libertad e ideas compartidas. El reto es bajar a la tierra y no quedarse solo en el plano de las ideas o la amistad.",
     "Aire 💨_Fuego 🔥": "El Aire aviva el Fuego. Relación llena de aventuras, pasión y dinamismo. Se inspiran mutuamente para actuar y explorar, logrando una excelente química.",
-    "Aire 💨_Tierra 🌍": "Lo práctico y lo intelectual. El Aire aporta visiones amplias y la Tierra se encarga de estructurarlas; deben ser pacientes, pues marchan a ritmos y enfoques muy distintos.",
+    "Aire 💨_Tierra 🌍": "Lo practical y lo intelectual. El Aire aporta visiones amplias y la Tierra se encarga de estructurarlas; deben ser pacientes, pues marchan a ritmos y enfoques muy distintos.",
     "Fuego 🔥_Fuego 🔥": "Pasión explosiva y acción constante. Mucha vitalidad, entusiasmo y franqueza; deben cuidar de no chocar sus egos o entrar en competencias desgastantes.",
     "Fuego 🔥_Tierra 🌍": "Impulso y estructura. El Fuego tiene la iniciativa y la Tierra la materializa. Si logran mediar entre la impulsividad del Fuego y la cautela de la Tierra, serán invencibles.",
     "Tierra 🌍_Tierra 🌍": "Estabilidad, lealtad y compromiso absoluto. Buscan construir a largo plazo con bases muy sólidas. El único reto es evitar que la relación caiga en la rutina o el aburrimiento."
@@ -105,14 +103,12 @@ def obtener_teclado_persistente():
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, is_persistent=True)
 
-# --- FUNCIÓN DE HORÓSCOPO (API Astrology.com / Ohmanda) ---
+# --- FUNCIÓN DE HORÓSCOPO (DETERMINISTA LOCAL) ---
 def obtener_horoscopo_diario(signo_espanol):
-    """Genera una predicción astrológica diaria coherente y determinista según la fecha."""
     signo = signo_espanol.lower()
     if signo not in DATOS_ASTROLOGICOS:
         return None
 
-    # Usamos la fecha actual como semilla para que la predicción cambie cada día a medianoche
     fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
     semilla = f"{signo}_{fecha_hoy}"
     rng = random.Random(semilla)
@@ -216,7 +212,6 @@ def generar_datos_carta_aleatoria(signo_usuario=None):
         
     texto_final = f"{titulo}\n\n<b>Interpretación:</b>\n{interpretacion}"
     
-    # Horóscopo diario directo (sin texto de sinergia de elementos)
     if signo_usuario and signo_usuario in DATOS_ASTROLOGICOS:
         horoscopo_api = obtener_horoscopo_diario(signo_usuario.lower())
         if horoscopo_api:
@@ -272,7 +267,6 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
                 significado = datos_carta['significado_derecho']
                 titulo_carta = f"{nombre_real} (al derecho ⭐)"
             
-            # Texto exclusivo de la carta y su posición temporal
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
             ruta_imagen = f"imagenes/{clave}.jpg" 
             
@@ -531,7 +525,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         interpretacion = carta["significado_invertido"] if esta_invertida else carta["significado_derecho"]
         
         mensaje_final = (
-            f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} & {astro_pareja['nombre']})</b> 💞\n\n"
+            f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} y {astro_pareja['nombre']})</b> 💞\n\n"
             f"{titulo}\n\n"
             f"<b>Interpretación:</b>\n{interpretacion}\n\n"
             f"✨ <b>Sinergia de Elementos ({astro_user['elemento']} + {astro_pareja['elemento']}):</b>\n"
@@ -550,7 +544,7 @@ async def manejar_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         try:
             if len(mensaje_final) > 1000:
-                caption_corta = f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} & {astro_pareja['nombre']})</b>"
+                caption_corta = f"💞 <b>VÍNCULO DEL DÍA ({astro_user['nombre']} y {astro_pareja['nombre']})</b>"
                 if esta_invertida:
                     memoria = await asyncio.to_thread(procesar_imagen_invertida, ruta_imagen)
                     await context.bot.send_photo(chat_id=chat_id, photo=memoria, caption=caption_corta, parse_mode="HTML")
