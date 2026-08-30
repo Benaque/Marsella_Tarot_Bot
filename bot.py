@@ -107,31 +107,37 @@ def obtener_teclado_persistente():
 
 # --- FUNCIÓN DE HORÓSCOPO (API Astrology.com / Ohmanda) ---
 def obtener_horoscopo_diario(signo_espanol):
-    """Consulta la API Horoscope-App en formato JSON y traduce la predicción."""
-    traduccion_signos = {
-        "aries": "aries", "tauro": "taurus", "geminis": "gemini",
-        "cancer": "cancer", "leo": "leo", "virgo": "virgo",
-        "libra": "libra", "escorpio": "scorpio", "sagitario": "sagittarius",
-        "capricornio": "capricorn", "acuario": "aquarius", "piscis": "pisces"
-    }
-    
-    signo_en = traduccion_signos.get(signo_espanol.lower(), "aries")
-    url = f"https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign={signo_en}&day=today"
-    
-    try:
-        respuesta = requests.get(url, timeout=8)
-        if respuesta.status_code == 200:
-            datos = respuesta.json()
-            # Esta API entrega el texto dentro de data -> horoscope_data
-            horoscopo_ingles = datos.get("data", {}).get("horoscope_data", "")
-            
-            if horoscopo_ingles:
-                horoscopo_espanol = GoogleTranslator(source='en', target='es').translate(horoscopo_ingles)
-                return f"🔮 <b>Horóscopo del Día:</b> {horoscopo_espanol}"
-    except Exception as e:
-        logging.error(f"⚠️ Error al conectar con Horoscope-App API: {e}")
-    
-    return None
+    """Genera una predicción astrológica diaria coherente y determinista según la fecha."""
+    signo = signo_espanol.lower()
+    if signo not in DATOS_ASTROLOGICOS:
+        return None
+
+    # Usamos la fecha actual como semilla para que la predicción cambie cada día a medianoche
+    fecha_hoy = datetime.date.today().strftime("%Y-%m-%d")
+    semilla = f"{signo}_{fecha_hoy}"
+    rng = random.Random(semilla)
+
+    enfoques = [
+        "Un flujo de energía renovada impulsa tus proyectos personales. Es momento de confiar en tus corazonadas y no dudar al tomar la iniciativa.",
+        "La configuración astral favorece la introspección y el orden financiero. Prioriza lo esencial y evita tomar compromisos apresurados.",
+        "Se abren canales fluidos de comunicación. Una conversación pendiente revelará acuerdos valiosos y aclarará dudas en tus relaciones.",
+        "Tu intuición se encuentra especialmente aguda. Escucha lo que sientes antes de reaccionar ante cambios imprevistos en tu entorno.",
+        "Momento ideal para proyectar tus metas a mediano plazo. Tu disciplina y constancia serán la clave para destrabar asuntos pendientes.",
+        "Las tensiones recientes comienzan a disiparse. Concéntrate en recuperar tu balance interno y rodearte de espacios de tranquilidad."
+    ]
+
+    consejos = [
+        "Palabra clave de hoy: <b>Determinación</b>.",
+        "Palabra clave de hoy: <b>Paciencia</b>.",
+        "Palabra clave de hoy: <b>Claridad mental</b>.",
+        "Palabra clave de hoy: <b>Equilibrio</b>.",
+        "Palabra clave de hoy: <b>Transformación</b>."
+    ]
+
+    texto_prediccion = rng.choice(enfoques)
+    texto_consejo = rng.choice(consejos)
+
+    return f"🔮 <b>Horóscopo del Día:</b>\n{texto_prediccion}\n\n💡 {texto_consejo}"
 
 # --- BASE DE DATOS SQLITE ---
 os.makedirs('/app/data', exist_ok=True) if os.path.exists('/app') else os.makedirs('data', exist_ok=True)
