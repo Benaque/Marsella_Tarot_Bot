@@ -263,6 +263,7 @@ async def ejecutar_tres_cartas(chat_id, context, mensaje_espera):
                 significado = datos_carta['significado_derecho']
                 titulo_carta = f"{nombre_real} (al derecho ⭐)"
             
+            # Texto exclusivo de la carta y su posición temporal
             texto_lectura = f"📌 <b>{posicion}: {titulo_carta}</b>\n\n📖 <i>{significado}</i>"
             ruta_imagen = f"imagenes/{clave}.jpg" 
             
